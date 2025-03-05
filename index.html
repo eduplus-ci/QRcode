@@ -4,54 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Générer un Reçu - Edu'Plus</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
-    <style>
-        /* Style basique pour l'interface */
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-            background-color: #f4f4f9;
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        #qrcode {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-    </style>
 </head>
 <body>
-
     <h2>Générer un Reçu</h2>
-    <!-- Ajout des nouveaux champs -->
     <input type="text" id="client" placeholder="Nom du client">
     <input type="text" id="paymentObject" placeholder="Objet du paiement">
     <input type="text" id="month" placeholder="Mois concerné">
@@ -61,22 +17,27 @@
 
     <h3>QR Code du reçu :</h3>
     <div id="qrcode"></div>
-    
-    <script>
-        // 🔥 Configuration Firebase
+
+    <script type="module">
+        // Importer Firebase v9 et Firestore
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
-    authDomain: "databasere-e2d71.firebaseapp.com",
-    projectId: "databasere-e2d71",
-    storageBucket: "databasere-e2d71.firebasestorage.app",
-    messagingSenderId: "83464780951",
-    appId: "1:83464780951:web:47c0846b383418a2abfdd2",
-    measurementId: "G-47B4QRQTYX"
+            authDomain: "databasere-e2d71.firebaseapp.com",
+            projectId: "databasere-e2d71",
+            storageBucket: "databasere-e2d71.firebasestorage.app",
+            messagingSenderId: "83464780951",
+            appId: "1:83464780951:web:47c0846b383418a2abfdd2",
+            measurementId: "G-47B4QRQTYX"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
 
-        // 📝 Fonction pour générer un reçu
+        // Initialiser Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Fonction pour générer un reçu
         async function generateReceipt() {
             let client = document.getElementById("client").value;
             let paymentObject = document.getElementById("paymentObject").value;
@@ -95,9 +56,9 @@
                 return;
             }
 
-            // 🔹 Ajouter dans Firestore
+            // Ajouter le reçu dans Firestore
             try {
-                let receiptRef = await db.collection("receipts").add({
+                let receiptRef = await addDoc(collection(db, "receipts"), {
                     client: client,
                     paymentObject: paymentObject,
                     month: month,
@@ -109,7 +70,7 @@
                 let receiptId = receiptRef.id;
                 let receiptURL = `https://eduplus-ci.github.io/QRcode/verify.html?id=${receiptId}`;
 
-                // 🔹 Générer le QR Code
+                // Générer le QR Code
                 document.getElementById("qrcode").innerHTML = "";
                 new QRCode(document.getElementById("qrcode"), {
                     text: receiptURL,
@@ -120,10 +81,9 @@
                 alert("Reçu généré avec succès !");
             } catch (error) {
                 alert("Erreur lors de la génération du reçu. Veuillez réessayer.");
-                console.error("Erreur :", error);
+                console.error("Erreur lors de l'ajout du reçu dans Firestore:", error);
             }
         }
     </script>
-
 </body>
 </html>
