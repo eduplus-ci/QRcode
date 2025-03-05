@@ -1,57 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Enregistrer les Informations sur Firebase</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 </head>
 <body>
-<script>
-// Importer Firebase
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+    <h1>Enregistrer un reçu</h1>
+    <form id="form-recu">
+        <label for="nomClient">Nom du client:</label><br>
+        <input type="text" id="nomClient" required><br><br>
 
-// Configuration Firebase - Remplacez ceci avec votre propre config
-const firebaseConfig = {
-    apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
+        <label for="objetPayment">Objet du paiement:</label><br>
+        <input type="text" id="objetPayment" required><br><br>
+
+        <label for="datePayment">Date du paiement:</label><br>
+        <input type="date" id="datePayment" required><br><br>
+
+        <label for="moisConcerne">Mois concerné:</label><br>
+        <input type="text" id="moisConcerne" required><br><br>
+
+        <label for="montant">Montant:</label><br>
+        <input type="number" id="montant" required><br><br>
+
+        <button type="submit">Enregistrer le reçu</button>
+    </form>
+
+    <script>
+        // Configuration Firebase - Remplace ceci avec ta propre config Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
     authDomain: "databasere-e2d71.firebaseapp.com",
     projectId: "databasere-e2d71",
     storageBucket: "databasere-e2d71.firebasestorage.app",
     messagingSenderId: "83464780951",
     appId: "1:83464780951:web:47c0846b383418a2abfdd2",
     measurementId: "G-47B4QRQTYX"
-};
+        };
 
-// Initialiser Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+        // Initialiser Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-// Fonction pour enregistrer un reçu
-async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
-  try {
-    // Ajouter un document à la collection "recu"
-    const docRef = await addDoc(collection(db, "recu"), {
-      nomClient: nomClient,
-      objetPayment: objetPayment,
-      datePayment: datePayment,
-      moisConcerne: moisConcerne,
-      montant: montant,
-      idRecu: docRef.id // Firebase génère un ID unique pour chaque document
-    });
+        // Fonction pour enregistrer le reçu dans Firestore
+        async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
+            try {
+                // Ajouter un document à la collection "recu"
+                const docRef = await db.collection("recu").add({
+                    nomClient: nomClient,
+                    objetPayment: objetPayment,
+                    datePayment: datePayment,
+                    moisConcerne: moisConcerne,
+                    montant: montant
+                });
 
-    console.log("Réception enregistrée avec l'ID :", docRef.id);
-  } catch (e) {
-    console.error("Erreur d'ajout du document : ", e);
-  }
-}
+                alert("Réception enregistrée avec l'ID : " + docRef.id);
+            } catch (e) {
+                console.error("Erreur d'ajout du document : ", e);
+                alert("Erreur lors de l'enregistrement du reçu");
+            }
+        }
 
-// Exemple d'utilisation
-enregistrerRecu("John Doe", "Achat de produit", "2025-03-05", "Mars 2025", 250);
+        // Ajouter l'événement pour soumettre le formulaire
+        document.getElementById("form-recu").addEventListener("submit", function(event) {
+            event.preventDefault();
 
+            const nomClient = document.getElementById("nomClient").value;
+            const objetPayment = document.getElementById("objetPayment").value;
+            const datePayment = document.getElementById("datePayment").value;
+            const moisConcerne = document.getElementById("moisConcerne").value;
+            const montant = document.getElementById("montant").value;
 
-</script>
-
-    
-     
+            // Appeler la fonction pour enregistrer le reçu
+            enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant);
+        });
+    </script>
 </body>
 </html>
