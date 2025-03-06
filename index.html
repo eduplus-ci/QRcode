@@ -26,7 +26,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app); // Initialisation de Firestore
         const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
-        
+
         // Fonction pour enregistrer les informations dans Firestore
         async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
             try {
@@ -39,7 +39,10 @@
                     montant: montant
                 });
 
-                alert("Réception enregistrée avec l'ID : " + docRef.id); // Afficher l'ID du document créé
+                // Afficher le lien avec l'ID du document créé
+                const link = `https://eduplus-ci.github.io/QRcode/verify.html?id=${docRef.id}`;
+                const linkContainer = document.getElementById("link-container");
+                linkContainer.innerHTML = `Votre reçu a été enregistré avec succès. Vous pouvez le vérifier ici : <a href="${link}" target="_blank">${link}</a>`;
             } catch (e) {
                 console.error("Erreur lors de l'ajout du document : ", e);
                 alert("Erreur lors de l'enregistrement du reçu");
@@ -150,6 +153,13 @@
             background-color: #ddd;
             cursor: not-allowed;
         }
+
+        /* Style pour afficher le lien */
+        #link-container {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -173,6 +183,9 @@
 
             <button type="submit">Enregistrer le reçu</button>
         </form>
+
+        <!-- Conteneur pour afficher le lien -->
+        <div id="link-container"></div>
     </div>
 </body>
 </html>
