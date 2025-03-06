@@ -58,23 +58,23 @@
             const qrUrl = `https://eduplus-ci.github.io/QRcode/verify.html?id=${id}`;
 
             // Créer le QR Code avec l'URL générée
-            const qrcode = new QRCode(qrcodeContainer, {
+            new QRCode(qrcodeContainer, {
                 text: qrUrl,
                 width: 200,
                 height: 200,
                 colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
+                colorLight: "#ffffff"
             });
 
             // Créer un bouton pour télécharger le QR Code
             const downloadButton = document.createElement('button');
             downloadButton.innerText = 'Télécharger le QR Code';
             downloadButton.addEventListener('click', function () {
-                // Télécharger le QR Code sous forme d'image PNG
+                const canvas = qrcodeContainer.querySelector('canvas'); // Récupérer le canvas du QR code
+                const imageUrl = canvas.toDataURL('image/png'); // Convertir le canvas en image PNG
                 const a = document.createElement('a');
-                a.href = qrcode._oDrawing._elImage.src;
-                a.download = `${objetPayment}-${nomClient}-${datePayment}-${moisConcerne}.png`;
+                a.href = imageUrl;
+                a.download = `${objetPayment}-${nomClient}-${datePayment}-${moisConcerne}.png`; // Télécharger avec le nom désiré
                 a.click();
             });
 
