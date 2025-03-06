@@ -58,28 +58,121 @@
 
             // Appeler la fonction pour enregistrer le reçu
             enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant);
+            
+            // Réinitialiser le formulaire après l'enregistrement
+            document.getElementById("form-recu").reset();
         });
     </script>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"] {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:active {
+            background-color: #3e8e41;
+        }
+
+        .form-container input:disabled {
+            background-color: #f0f0f0;
+        }
+
+        .form-container input::placeholder {
+            color: #aaa;
+        }
+
+        .form-container button:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
-    <h1>Enregistrer un reçu</h1>
-    <form id="form-recu">
-        <label for="nomClient">Nom du client:</label><br>
-        <input type="text" id="nomClient" required><br><br>
+    <div class="form-container">
+        <h1>Enregistrer un reçu</h1>
+        <form id="form-recu">
+            <label for="nomClient">Nom du client:</label>
+            <input type="text" id="nomClient" placeholder="Nom du client" required>
 
-        <label for="objetPayment">Objet du paiement:</label><br>
-        <input type="text" id="objetPayment" required><br><br>
+            <label for="objetPayment">Objet du paiement:</label>
+            <input type="text" id="objetPayment" placeholder="Objet du paiement" required>
 
-        <label for="datePayment">Date du paiement:</label><br>
-        <input type="date" id="datePayment" required><br><br>
+            <label for="datePayment">Date du paiement:</label>
+            <input type="date" id="datePayment" required>
 
-        <label for="moisConcerne">Mois concerné:</label><br>
-        <input type="text" id="moisConcerne" required><br><br>
+            <label for="moisConcerne">Mois concerné:</label>
+            <input type="text" id="moisConcerne" placeholder="Mois concerné" required>
 
-        <label for="montant">Montant:</label><br>
-        <input type="number" id="montant" required><br><br>
+            <label for="montant">Montant:</label>
+            <input type="number" id="montant" placeholder="Montant" required>
 
-        <button type="submit">Enregistrer le reçu</button>
-    </form>
+            <button type="submit">Enregistrer le reçu</button>
+        </form>
+    </div>
 </body>
 </html>
