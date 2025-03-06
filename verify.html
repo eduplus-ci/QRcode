@@ -29,22 +29,51 @@
 
         // Fonction pour récupérer un reçu par ID
         async function getReceiptById(receiptId) {
-            const docRef = doc(db, "recu", receiptId);  // On récupère le document par ID
-            const docSnap = await getDoc(docRef);  // Obtenir le document
+            try {
+                const docRef = doc(db, "recu", receiptId);  // On récupère le document par ID
+                const docSnap = await getDoc(docRef);  // Obtenir le document
 
-            if (docSnap.exists()) {
-                // Si le document existe, on affiche les données
-                const receiptData = docSnap.data();
-                document.getElementById("nomClient").innerText = receiptData.nomClient;
-                document.getElementById("objetPayment").innerText = receiptData.objetPayment;
-                document.getElementById("datePayment").innerText = receiptData.datePayment;
-                document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
-                document.getElementById("montant").innerText = receiptData.montant;
-                document.getElementById("receiptok").innerText = "Votre reçu est bien authentique, merci pour votre confiance...";
-            } else {
-                // Si le document n'existe pas
-                document.getElementById("receiptDetails").innerText = "Aucun reçu trouvé pour cet ID.";
+                if (docSnap.exists()) {
+                    // Si le document existe, on affiche les données
+                    const receiptData = docSnap.data();
+                    document.getElementById("nomClient").innerText = receiptData.nomClient;
+                    document.getElementById("objetPayment").innerText = receiptData.objetPayment;
+                    document.getElementById("datePayment").innerText = receiptData.datePayment;
+                    document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
+                    document.getElementById("montant").innerText = receiptData.montant;
+                    document.getElementById("receiptok").innerText = "Votre reçu est bien authentique, merci pour votre confiance...";
+
+                    // Générer le QR code
+                    generateQRCode(receiptId);
+                } else {
+                    // Si le document n'existe pas
+                    document.getElementById("receiptDetails").innerText = "Aucun reçu trouvé pour cet ID.";
+                }
+            } catch (error) {
+                console.error("Erreur lors de la récupération du reçu :", error);
+                document.getElementById("receiptDetails").innerText = "Une erreur s'est produite lors de la récupération du reçu.";
+            } finally {
+                document.getElementById("loading").style.display = "none"; // Masquer le spinner
             }
+        }
+
+        // Fonction pour générer un QR code
+        function generateQRCode(receiptId) {
+            const qrCodeUrl = `https://eduplus-ci.github.io/QRcode/verify.html?id=${receiptId}`;
+            const qrCodeContainer = document.getElementById("qrcode");
+
+            // Effacer le contenu précédent du conteneur QR code
+            qrCodeContainer.innerHTML = "";
+
+            // Générer le nouveau QR code
+            new QRCode(qrCodeContainer, {
+                text: qrCodeUrl,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
         }
 
         // Récupérer l'ID du reçu à partir de l'URL
@@ -57,8 +86,12 @@
         } else {
             // Si l'ID n'est pas passé dans l'URL
             document.getElementById("receiptDetails").innerText = "ID de reçu manquant dans l'URL.";
+            document.getElementById("loading").style.display = "none"; // Masquer le spinner
         }
     </script>
+
+    <!-- Importation de la bibliothèque QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         body {
@@ -78,7 +111,20 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 20px;
             width: 100%;
-            max-width: 600px;
+            max-width: 800px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .details-section {
+            flex: 1;
+        }
+
+        .qr-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         h1 {
@@ -107,45 +153,53 @@
             text-align: center;
         }
 
-        #receiptok{
+        #receiptok {
             font-size: 18px;
             font-weight: bold;
             color: #3e8e41;
             text-align: center;
         }
 
-
-
+        #loading {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Détails du Reçu</h1>
-        <div id="receiptDetails"></div> <!-- Message d'erreur ou information si ID non trouvé -->
+        <div class="details-section">
+            <h1>Détails du Reçu</h1>
+            <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
+            <div id="receiptDetails"></div> <!-- Message d'erreur -->
+            <div id="receiptok"></div> <!-- Message de succès -->
 
-        <div class="details">
-            <label for="nomClient">Nom du client:</label>
-            <span id="nomClient">Chargement...</span>
+            <div class="details">
+                <label for="nomClient">Nom du client:</label>
+                <span id="nomClient">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="objetPayment">Objet du paiement:</label>
+                <span id="objetPayment">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="datePayment">Date du paiement:</label>
+                <span id="datePayment">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="moisConcerne">Mois concerné:</label>
+                <span id="moisConcerne">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="montant">Montant:</label>
+                <span id="montant">Chargement...</span>
+            </div>
         </div>
-        <div class="details">
-            <label for="objetPayment">Objet du paiement:</label>
-            <span id="objetPayment">Chargement...</span>
+
+        <div class="qr-section">
+            <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
         </div>
-        <div class="details">
-            <label for="datePayment">Date du paiement:</label>
-            <span id="datePayment">Chargement...</span>
-        </div>
-        <div class="details">
-            <label for="moisConcerne">Mois concerné:</label>
-            <span id="moisConcerne">Chargement...</span>
-        </div>
-        <div class="details">
-            <label for="montant">Montant:</label>
-            <span id="montant">Chargement...</span>
-        </div>
-        
-        <div id="receiptok"></div><!-- Message  information si ID  trouvé -->
     </div>
-    
 </body>
 </html>
