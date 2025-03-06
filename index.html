@@ -11,9 +11,6 @@
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
-        // Importation de la bibliothèque QR Code
-        import QRCode from "https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js";
-
         // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
@@ -60,33 +57,28 @@
         function generateQRCode(qrUrl, objetPayment, nomClient, datePayment, moisConcerne) {
             const qrcodeContainer = document.getElementById("qrcode-container");
 
-            // Créer le QR Code
-            QRCode.toDataURL(qrUrl, { errorCorrectionLevel: 'H' }, function (err, url) {
-                if (err) {
-                    console.error("Erreur lors de la génération du QR Code", err);
-                    return;
-                }
-
-                // Afficher le QR Code dans l'élément "qrcode-container"
-                const img = document.createElement('img');
-                img.src = url;
-                img.alt = "QR Code";
-                qrcodeContainer.innerHTML = ''; // Clear any previous QR code
-                qrcodeContainer.appendChild(img);
-
-                // Créer un bouton pour télécharger le QR Code
-                const downloadButton = document.createElement('button');
-                downloadButton.innerText = 'Télécharger le QR Code';
-                downloadButton.addEventListener('click', function () {
-                    // Télécharger le QR Code sous forme d'image PNG
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${objetPayment}-${nomClient}-${datePayment}-${moisConcerne}.png`;
-                    a.click();
-                });
-
-                qrcodeContainer.appendChild(downloadButton);
+            // Créer le QR Code avec l'URL générée
+            const qrcode = new QRCode(qrcodeContainer, {
+                text: qrUrl,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
             });
+
+            // Créer un bouton pour télécharger le QR Code
+            const downloadButton = document.createElement('button');
+            downloadButton.innerText = 'Télécharger le QR Code';
+            downloadButton.addEventListener('click', function () {
+                // Télécharger le QR Code sous forme d'image PNG
+                const a = document.createElement('a');
+                a.href = qrcode._oDrawing._elImage.src;
+                a.download = `${objetPayment}-${nomClient}-${datePayment}-${moisConcerne}.png`;
+                a.click();
+            });
+
+            qrcodeContainer.appendChild(downloadButton);
         }
 
         // Ajouter un événement de soumission de formulaire
@@ -106,6 +98,9 @@
             document.getElementById("form-recu").reset();
         });
     </script>
+
+    <!-- Importation de la bibliothèque QR Code -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
     <style>
         body {
