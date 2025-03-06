@@ -39,23 +39,23 @@
                     montant: montant
                 });
 
+                console.log("Réception enregistrée avec l'ID : ", docRef.id); // Afficher l'ID du document créé
                 alert("Réception enregistrée avec l'ID : " + docRef.id); // Afficher l'ID du document créé
 
-                // Générer l'URL du QR Code
-                const qrUrl = `https://eduplus-ci.github.io/QRcode/verify.html?id=${docRef.id}`;
-
-                // Générer et afficher le QR Code
-                generateQRCode(qrUrl, objetPayment, nomClient, datePayment, moisConcerne);
-
+                // Appeler la fonction pour générer le QR Code
+                generateQRCode(docRef.id, objetPayment, nomClient, datePayment, moisConcerne);
             } catch (e) {
                 console.error("Erreur lors de l'ajout du document : ", e);
-                alert("Erreur lors de l'enregistrement du reçu");
+                alert("Erreur lors de l'enregistrement du reçu : " + e.message);
             }
         }
 
         // Fonction pour générer le QR Code
-        function generateQRCode(qrUrl, objetPayment, nomClient, datePayment, moisConcerne) {
+        function generateQRCode(id, objetPayment, nomClient, datePayment, moisConcerne) {
             const qrcodeContainer = document.getElementById("qrcode-container");
+
+            // Générer l'URL du QR Code
+            const qrUrl = `https://eduplus-ci.github.io/QRcode/verify.html?id=${id}`;
 
             // Créer le QR Code avec l'URL générée
             const qrcode = new QRCode(qrcodeContainer, {
