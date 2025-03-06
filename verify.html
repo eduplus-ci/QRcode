@@ -40,6 +40,7 @@
                 document.getElementById("datePayment").innerText = receiptData.datePayment;
                 document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
                 document.getElementById("montant").innerText = receiptData.montant;
+                document.getElementById("receiptok").innerText = "Votre reçu est bien authentique, merci pour votre confiance...";
             } else {
                 // Si le document n'existe pas
                 document.getElementById("receiptDetails").innerText = "Aucun reçu trouvé pour cet ID.";
@@ -105,6 +106,16 @@
             color: red;
             text-align: center;
         }
+
+        #receiptok{
+            font-size: 18px;
+            font-weight: bold;
+            color: #3e8e41;
+            text-align: center;
+        }
+
+
+
     </style>
 </head>
 <body>
@@ -133,5 +144,6 @@
             <span id="montant">Chargement...</span>
         </div>
     </div>
+    <div id="receiptok"></div><!-- Message  information si ID  trouvé -->
 </body>
 </html>
