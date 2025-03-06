@@ -26,7 +26,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app); // Initialisation de Firestore
         const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
-
+        
         // Fonction pour enregistrer les informations dans Firestore
         async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
             try {
@@ -39,51 +39,15 @@
                     montant: montant
                 });
 
-                console.log("Réception enregistrée avec l'ID : ", docRef.id); // Afficher l'ID du document créé
                 alert("Réception enregistrée avec l'ID : " + docRef.id); // Afficher l'ID du document créé
-
-                // Appeler la fonction pour générer le QR Code
-                generateQRCode(docRef.id, objetPayment, nomClient, datePayment, moisConcerne);
             } catch (e) {
                 console.error("Erreur lors de l'ajout du document : ", e);
-                alert("Erreur lors de l'enregistrement du reçu : " + e.message);
+                alert("Erreur lors de l'enregistrement du reçu");
             }
         }
 
-        // Fonction pour générer le QR Code
-        function generateQRCode(id, objetPayment, nomClient, datePayment, moisConcerne) {
-            const qrcodeContainer = document.getElementById("qrcode-container");
-
-            // Générer l'URL du QR Code
-            const qrUrl = `https://eduplus-ci.github.io/QRcode/verify.html?id=${id}`;
-
-            // Créer le QR Code avec l'URL générée
-            new QRCode(qrcodeContainer, {
-                text: qrUrl,
-                width: 200,
-                height: 200,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.L // Utilisation du niveau correct de type "L"
-            });
-
-            // Créer un bouton pour télécharger le QR Code
-            const downloadButton = document.createElement('button');
-            downloadButton.innerText = 'Télécharger le QR Code';
-            downloadButton.addEventListener('click', function () {
-                const canvas = qrcodeContainer.querySelector('canvas'); // Récupérer le canvas du QR code
-                const imageUrl = canvas.toDataURL('image/png'); // Convertir le canvas en image PNG
-                const a = document.createElement('a');
-                a.href = imageUrl;
-                a.download = `${objetPayment}-${nomClient}-${datePayment}-${moisConcerne}.png`; // Télécharger avec le nom désiré
-                a.click();
-            });
-
-            qrcodeContainer.appendChild(downloadButton);
-        }
-
         // Ajouter un événement de soumission de formulaire
-        document.getElementById("form-recu").addEventListener("submit", function (event) {
+        document.getElementById("form-recu").addEventListener("submit", function(event) {
             event.preventDefault();
 
             const nomClient = document.getElementById("nomClient").value;
@@ -94,14 +58,11 @@
 
             // Appeler la fonction pour enregistrer le reçu
             enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant);
-
+            
             // Réinitialiser le formulaire après l'enregistrement
             document.getElementById("form-recu").reset();
         });
     </script>
-
-    <!-- Importation de la bibliothèque QR Code -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
     <style>
         body {
@@ -113,6 +74,11 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
         }
 
         .form-container {
@@ -146,6 +112,13 @@
             width: 100%;
         }
 
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
         button {
             background-color: #4CAF50;
             color: white;
@@ -165,28 +138,17 @@
             background-color: #3e8e41;
         }
 
-        #qrcode-container {
-            margin-top: 20px;
-            text-align: center;
+        .form-container input:disabled {
+            background-color: #f0f0f0;
         }
 
-        #qrcode-container img {
-            width: 200px;
-            height: 200px;
+        .form-container input::placeholder {
+            color: #aaa;
         }
 
-        #qrcode-container button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #qrcode-container button:hover {
-            background-color: #45a049;
+        .form-container button:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -211,8 +173,6 @@
 
             <button type="submit">Enregistrer le reçu</button>
         </form>
-
-        <div id="qrcode-container"></div> <!-- QR Code sera affiché ici -->
     </div>
 </body>
 </html>
