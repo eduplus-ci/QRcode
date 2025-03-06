@@ -3,9 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enregistrer les Informations sur Firebase</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <title>Enregistrer un Reçu sur Firebase</title>
+
+    <!-- Importation des SDK Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
+            authDomain: "databasere-e2d71.firebaseapp.com",
+            projectId: "databasere-e2d71",
+            storageBucket: "databasere-e2d71.firebasestorage.app",
+            messagingSenderId: "83464780951",
+            appId: "1:83464780951:web:47c0846b383418a2abfdd2",
+            measurementId: "G-47B4QRQTYX"
+        };
+
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app); // Initialisation de Firestore
+        const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
+        
+        // Fonction pour enregistrer les informations dans Firestore
+        async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
+            try {
+                // Ajout des données dans la collection "recu"
+                const docRef = await addDoc(collection(db, "recu"), {
+                    nomClient: nomClient,
+                    objetPayment: objetPayment,
+                    datePayment: datePayment,
+                    moisConcerne: moisConcerne,
+                    montant: montant
+                });
+
+                alert("Réception enregistrée avec l'ID : " + docRef.id); // Afficher l'ID du document créé
+            } catch (e) {
+                console.error("Erreur lors de l'ajout du document : ", e);
+                alert("Erreur lors de l'enregistrement du reçu");
+            }
+        }
+
+        // Ajouter un événement de soumission de formulaire
+        document.getElementById("form-recu").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const nomClient = document.getElementById("nomClient").value;
+            const objetPayment = document.getElementById("objetPayment").value;
+            const datePayment = document.getElementById("datePayment").value;
+            const moisConcerne = document.getElementById("moisConcerne").value;
+            const montant = document.getElementById("montant").value;
+
+            // Appeler la fonction pour enregistrer le reçu
+            enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant);
+        });
+    </script>
 </head>
 <body>
     <h1>Enregistrer un reçu</h1>
@@ -27,55 +81,5 @@
 
         <button type="submit">Enregistrer le reçu</button>
     </form>
-
-    <script>
-        // Configuration Firebase - Remplace ceci avec ta propre config Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
-    authDomain: "databasere-e2d71.firebaseapp.com",
-    projectId: "databasere-e2d71",
-    storageBucket: "databasere-e2d71.firebasestorage.app",
-    messagingSenderId: "83464780951",
-    appId: "1:83464780951:web:47c0846b383418a2abfdd2",
-    measurementId: "G-47B4QRQTYX"
-        };
-
-        // Initialiser Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // Fonction pour enregistrer le reçu dans Firestore
-        async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
-            try {
-                // Ajouter un document à la collection "recu"
-                const docRef = await db.collection("recu").add({
-                    nomClient: nomClient,
-                    objetPayment: objetPayment,
-                    datePayment: datePayment,
-                    moisConcerne: moisConcerne,
-                    montant: montant
-                });
-
-                alert("Réception enregistrée avec l'ID : " + docRef.id);
-            } catch (e) {
-                console.error("Erreur d'ajout du document : ", e);
-                alert("Erreur lors de l'enregistrement du reçu");
-            }
-        }
-
-        // Ajouter l'événement pour soumettre le formulaire
-        document.getElementById("form-recu").addEventListener("submit", function(event) {
-            event.preventDefault();
-
-            const nomClient = document.getElementById("nomClient").value;
-            const objetPayment = document.getElementById("objetPayment").value;
-            const datePayment = document.getElementById("datePayment").value;
-            const moisConcerne = document.getElementById("moisConcerne").value;
-            const montant = document.getElementById("montant").value;
-
-            // Appeler la fonction pour enregistrer le reçu
-            enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant);
-        });
-    </script>
 </body>
 </html>
