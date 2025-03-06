@@ -3,93 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vérification de Reçu - Edu'Plus</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <title>Vérifier le Reçu</title>
+
+    <!-- Importation des SDK Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
+            authDomain: "databasere-e2d71.firebaseapp.com",
+            projectId: "databasere-e2d71",
+            storageBucket: "databasere-e2d71.firebasestorage.app",
+            messagingSenderId: "83464780951",
+            appId: "1:83464780951:web:47c0846b383418a2abfdd2",
+            measurementId: "G-47B4QRQTYX"
+        };
+
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app); // Initialisation de Firestore
+        const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
+
+        // Fonction pour récupérer un reçu par ID
+        async function getReceiptById(receiptId) {
+            const docRef = doc(db, "recu", receiptId);  // On récupère le document par ID
+            const docSnap = await getDoc(docRef);  // Obtenir le document
+
+            if (docSnap.exists()) {
+                // Si le document existe, on affiche les données
+                const receiptData = docSnap.data();
+                document.getElementById("nomClient").innerText = receiptData.nomClient;
+                document.getElementById("objetPayment").innerText = receiptData.objetPayment;
+                document.getElementById("datePayment").innerText = receiptData.datePayment;
+                document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
+                document.getElementById("montant").innerText = receiptData.montant;
+            } else {
+                // Si le document n'existe pas
+                document.getElementById("receiptDetails").innerText = "Aucun reçu trouvé pour cet ID.";
+            }
+        }
+
+        // Récupérer l'ID du reçu à partir de l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const receiptId = urlParams.get('id');
+
+        if (receiptId) {
+            // Si un ID est passé dans l'URL, on récupère le reçu correspondant
+            getReceiptById(receiptId);
+        } else {
+            // Si l'ID n'est pas passé dans l'URL
+            document.getElementById("receiptDetails").innerText = "ID de reçu manquant dans l'URL.";
+        }
+    </script>
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-            background-color: #f4f4f9;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-        h2 {
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
             text-align: center;
             color: #333;
         }
-        #receipt-details {
-            padding: 20px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        p {
+
+        .details {
             font-size: 16px;
             color: #333;
+            margin-bottom: 15px;
         }
-        .error {
-            color: red;
+
+        .details label {
             font-weight: bold;
+        }
+
+        .details span {
+            color: #555;
+        }
+
+        #receiptDetails {
+            font-size: 18px;
+            font-weight: bold;
+            color: red;
+            text-align: center;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Détails du Reçu</h1>
+        <div id="receiptDetails"></div> <!-- Message d'erreur ou information si ID non trouvé -->
 
-    <h2>Vérification du Reçu</h2>
-    <div id="receipt-details"></div>
-
-    <script>
-        // 🔥 Configuration Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
-    authDomain: "databasere-e2d71.firebaseapp.com",
-    projectId: "databasere-e2d71",
-    storageBucket: "databasere-e2d71.firebasestorage.app",
-    messagingSenderId: "83464780951",
-    appId: "1:83464780951:web:47c0846b383418a2abfdd2",
-    measurementId: "G-47B4QRQTYX"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // 🕵‍♂ Fonction pour récupérer et afficher le reçu
-        async function fetchReceipt() {
-            let urlParams = new URLSearchParams(window.location.search);
-            let receiptId = urlParams.get("id");
-
-            if (!receiptId) {
-                document.getElementById("receipt-details").innerHTML = "<p class='error'>Aucun reçu trouvé. L'ID du reçu est manquant.</p>";
-                return;
-            }
-
-            try {
-                let receiptRef = db.collection("receipts").doc(receiptId);
-                let receipt = await receiptRef.get();
-
-                if (!receipt.exists) {
-                    document.getElementById("receipt-details").innerHTML = "<p class='error'>Reçu introuvable.</p>";
-                } else {
-                    let data = receipt.data();
-                    let formattedDate = data.paymentDate ? new Date(data.paymentDate.seconds * 1000).toLocaleString() : "Date non disponible";
-                    document.getElementById("receipt-details").innerHTML = `
-                        <p><strong>ID du Reçu :</strong> ${receiptId}</p>
-                        <p><strong>Client :</strong> ${data.client}</p>
-                        <p><strong>Objet du Paiement :</strong> ${data.paymentObject}</p>
-                        <p><strong>Mois Concerné :</strong> ${data.month}</p>
-                        <p><strong>Date de Paiement :</strong> ${formattedDate}</p>
-                        <p><strong>Montant :</strong> ${data.amount} FCFA</p>
-                    `;
-                }
-            } catch (error) {
-                document.getElementById("receipt-details").innerHTML = "<p class='error'>Une erreur est survenue lors de la récupération du reçu.</p>";
-                console.error("Erreur :", error);
-            }
-        }
-
-        fetchReceipt();
-    </script>
-
+        <div class="details">
+            <label for="nomClient">Nom du client:</label>
+            <span id="nomClient">Chargement...</span>
+        </div>
+        <div class="details">
+            <label for="objetPayment">Objet du paiement:</label>
+            <span id="objetPayment">Chargement...</span>
+        </div>
+        <div class="details">
+            <label for="datePayment">Date du paiement:</label>
+            <span id="datePayment">Chargement...</span>
+        </div>
+        <div class="details">
+            <label for="moisConcerne">Mois concerné:</label>
+            <span id="moisConcerne">Chargement...</span>
+        </div>
+        <div class="details">
+            <label for="montant">Montant:</label>
+            <span id="montant">Chargement...</span>
+        </div>
+    </div>
 </body>
 </html>
