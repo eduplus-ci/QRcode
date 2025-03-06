@@ -11,6 +11,9 @@
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
+        // Importation de la bibliothèque QR Code
+        import QRCode from "https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js";
+
         // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
@@ -26,7 +29,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app); // Initialisation de Firestore
         const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
-        
+
         // Fonction pour enregistrer les informations dans Firestore
         async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
             try {
@@ -40,14 +43,54 @@
                 });
 
                 alert("Réception enregistrée avec l'ID : " + docRef.id); // Afficher l'ID du document créé
+
+                // Générer l'URL du QR Code
+                const qrUrl = `https://eduplus-ci.github.io/QRcode/verify.html?id=${docRef.id}`;
+
+                // Générer et afficher le QR Code
+                generateQRCode(qrUrl, objetPayment, nomClient, datePayment, moisConcerne);
+
             } catch (e) {
                 console.error("Erreur lors de l'ajout du document : ", e);
                 alert("Erreur lors de l'enregistrement du reçu");
             }
         }
 
+        // Fonction pour générer le QR Code
+        function generateQRCode(qrUrl, objetPayment, nomClient, datePayment, moisConcerne) {
+            const qrcodeContainer = document.getElementById("qrcode-container");
+
+            // Créer le QR Code
+            QRCode.toDataURL(qrUrl, { errorCorrectionLevel: 'H' }, function (err, url) {
+                if (err) {
+                    console.error("Erreur lors de la génération du QR Code", err);
+                    return;
+                }
+
+                // Afficher le QR Code dans l'élément "qrcode-container"
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = "QR Code";
+                qrcodeContainer.innerHTML = ''; // Clear any previous QR code
+                qrcodeContainer.appendChild(img);
+
+                // Créer un bouton pour télécharger le QR Code
+                const downloadButton = document.createElement('button');
+                downloadButton.innerText = 'Télécharger le QR Code';
+                downloadButton.addEventListener('click', function () {
+                    // Télécharger le QR Code sous forme d'image PNG
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${objetPayment}-${nomClient}-${datePayment}-${moisConcerne}.png`;
+                    a.click();
+                });
+
+                qrcodeContainer.appendChild(downloadButton);
+            });
+        }
+
         // Ajouter un événement de soumission de formulaire
-        document.getElementById("form-recu").addEventListener("submit", function(event) {
+        document.getElementById("form-recu").addEventListener("submit", function (event) {
             event.preventDefault();
 
             const nomClient = document.getElementById("nomClient").value;
@@ -58,7 +101,7 @@
 
             // Appeler la fonction pour enregistrer le reçu
             enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant);
-            
+
             // Réinitialiser le formulaire après l'enregistrement
             document.getElementById("form-recu").reset();
         });
@@ -74,11 +117,6 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
         }
 
         .form-container {
@@ -112,13 +150,6 @@
             width: 100%;
         }
 
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        input[type="date"]:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
-
         button {
             background-color: #4CAF50;
             color: white;
@@ -138,17 +169,28 @@
             background-color: #3e8e41;
         }
 
-        .form-container input:disabled {
-            background-color: #f0f0f0;
+        #qrcode-container {
+            margin-top: 20px;
+            text-align: center;
         }
 
-        .form-container input::placeholder {
-            color: #aaa;
+        #qrcode-container img {
+            width: 200px;
+            height: 200px;
         }
 
-        .form-container button:disabled {
-            background-color: #ddd;
-            cursor: not-allowed;
+        #qrcode-container button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #qrcode-container button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
@@ -173,6 +215,8 @@
 
             <button type="submit">Enregistrer le reçu</button>
         </form>
+
+        <div id="qrcode-container"></div> <!-- QR Code sera affiché ici -->
     </div>
 </body>
 </html>
