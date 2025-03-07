@@ -162,7 +162,11 @@
             font-weight: bold;
             color: #3e8e41;
             text-align: center;
-            
+            margin-top: 30px;
+            display: none;
+            width: 100%;
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         #loading {
@@ -200,15 +204,13 @@
                 <span id="montant">Chargement...</span>
             </div>
 
-
+            <!-- Message de succès -->
+            <div id="receiptok"></div>
         </div>
 
         <div class="qr-section">
             <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
         </div>
-                    
     </div>
-    <!-- Message de succès -->
-            <div id="receiptok"></div>
 </body>
 </html>
