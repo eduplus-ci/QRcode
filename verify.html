@@ -1,109 +1,244 @@
-<style>
-    body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f4f7fa;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh; /* Utiliser min-height pour éviter les problèmes de défilement */
-    }
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérifier le Reçu</title>
 
-    .container {
-        background-color: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        width: 90%; /* Largeur relative */
-        max-width: 800px; /* Largeur maximale */
-        min-width: 300px; /* Largeur minimale pour éviter que le contenu ne devienne trop petit */
-        display: flex;
-        gap: 20px;
-    }
+    <!-- Importation des SDK Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
-    .details-section {
-        flex: 1;
-    }
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
+            authDomain: "databasere-e2d71.firebaseapp.com",
+            projectId: "databasere-e2d71",
+            storageBucket: "databasere-e2d71.appspot.com",
+            messagingSenderId: "83464780951",
+            appId: "1:83464780951:web:47c0846b383418a2abfdd2",
+            measurementId: "G-47B4QRQTYX"
+        };
 
-    .qr-section {
-        flex: 0 0 auto; /* Le QR code ne grandit pas et ne rétrécit pas */
-        display: flex;
-        align-items: center; /* Centrer verticalement le QR code */
-    }
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app); // Initialisation de Firestore
+        const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
 
-    h1 {
-        text-align: center;
-        color: #333;
-        font-size: 24px; /* Taille de police relative */
-    }
+        // Fonction pour récupérer un reçu par ID
+        async function getReceiptById(receiptId) {
+            try {
+                const docRef = doc(db, "recu", receiptId);  // On récupère le document par ID
+                const docSnap = await getDoc(docRef);  // Obtenir le document
 
-    .details {
-        font-size: 16px;
-        color: #333;
-        margin-bottom: 15px;
-    }
+                if (docSnap.exists()) {
+                    // Si le document existe, on affiche les données
+                    const receiptData = docSnap.data();
+                    document.getElementById("nomClient").textContent = receiptData.nomClient;
+                    document.getElementById("objetPayment").textContent = receiptData.objetPayment;
+                    document.getElementById("datePayment").textContent = receiptData.datePayment;
+                    document.getElementById("moisConcerne").textContent = receiptData.moisConcerne;
+                    document.getElementById("montant").textContent = `${receiptData.montant} franc CFA`; // Ajout de "franc CFA"
+                    document.getElementById("receiptok").textContent = "Votre reçu est bien authentique, merci pour votre confiance...";
+                    document.getElementById("receiptok").style.display = "block"; // Afficher le message
 
-    .details label {
-        font-weight: bold;
-    }
+                    // Générer le QR code
+                    generateQRCode(receiptId);
+                } else {
+                    // Si le document n'existe pas
+                    document.getElementById("receiptDetails").textContent = "Aucun reçu trouvé pour cet ID.";
+                }
+            } catch (error) {
+                console.error("Erreur lors de la récupération du reçu :", error);
+                document.getElementById("receiptDetails").textContent = "Une erreur s'est produite lors de la récupération du reçu.";
+            } finally {
+                document.getElementById("loading").style.display = "none"; // Masquer le spinner
+            }
+        }
 
-    .details span {
-        color: #555;
-    }
+        // Fonction pour générer un QR code
+        function generateQRCode(receiptId) {
+            const qrCodeUrl = `https://eduplus-ci.github.io/QRcode/verify.html?id=${receiptId}`;
+            const qrCodeContainer = document.getElementById("qrcode");
 
-    #receiptDetails {
-        font-size: 18px;
-        font-weight: bold;
-        color: red;
-        text-align: center;
-    }
+            // Effacer le contenu précédent du conteneur QR code
+            qrCodeContainer.innerHTML = "";
 
-    #receiptok {
-        font-size: 18px;
-        font-weight: bold;
-        color: #3e8e41;
-        text-align: center;
-        margin-top: 30px; /* Espacement de deux lignes après le montant */
-        display: none; /* Masqué par défaut */
-        width: 100%; /* Occupe toute la largeur */
-        white-space: normal; /* Permettre le retour à la ligne */
-        word-wrap: break-word; /* Casser les mots longs si nécessaire */
-    }
+            // Générer le nouveau QR code
+            new QRCode(qrCodeContainer, {
+                text: qrCodeUrl,
+                width: 150, // Taille réduite du QR code
+                height: 150,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
 
-    #loading {
-        font-size: 18px;
-        font-weight: bold;
-        color: #333;
-    }
+        // Récupérer l'ID du reçu à partir de l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const receiptId = urlParams.get('id');
 
-    /* Media queries pour les petits écrans */
-    @media (max-width: 600px) {
+        if (receiptId) {
+            // Si un ID est passé dans l'URL, on récupère le reçu correspondant
+            getReceiptById(receiptId);
+        } else {
+            // Si l'ID n'est pas passé dans l'URL
+            document.getElementById("receiptDetails").textContent = "ID de reçu manquant dans l'URL.";
+            document.getElementById("loading").style.display = "none"; // Masquer le spinner
+        }
+    </script>
+
+    <!-- Importation de la bibliothèque QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Utiliser min-height pour éviter les problèmes de défilement */
+        }
+
         .container {
-            flex-direction: column; /* Disposition en colonne sur les petits écrans */
-            align-items: center; /* Centrer les éléments */
-            padding: 15px; /* Réduire le padding */
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 90%; /* Largeur relative */
+            max-width: 800px; /* Largeur maximale */
+            min-width: 300px; /* Largeur minimale pour éviter que le contenu ne devienne trop petit */
+            display: flex;
+            gap: 20px;
+        }
+
+        .details-section {
+            flex: 1;
         }
 
         .qr-section {
-            margin-top: 20px; /* Espacement entre les détails et le QR code */
+            flex: 0 0 auto; /* Le QR code ne grandit pas et ne rétrécit pas */
+            display: flex;
+            align-items: center; /* Centrer verticalement le QR code */
         }
 
         h1 {
-            font-size: 20px; /* Réduire la taille du titre */
+            text-align: center;
+            color: #333;
+            font-size: 24px; /* Taille de police relative */
         }
 
         .details {
-            font-size: 14px; /* Réduire la taille de la police */
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .details label {
+            font-weight: bold;
+        }
+
+        .details span {
+            color: #555;
+        }
+
+        #receiptDetails {
+            font-size: 18px;
+            font-weight: bold;
+            color: red;
+            text-align: center;
         }
 
         #receiptok {
-            font-size: 16px; /* Réduire la taille de la police */
+            font-size: 18px;
+            font-weight: bold;
+            color: #3e8e41;
+            text-align: center;
+            margin-top: 30px; /* Espacement de deux lignes après le montant */
+            display: none; /* Masqué par défaut */
+            width: 100%; /* Occupe toute la largeur */
+            white-space: normal; /* Permettre le retour à la ligne */
+            word-wrap: break-word; /* Casser les mots longs si nécessaire */
         }
 
-        #qrcode {
-            width: 120px; /* Réduire la taille du QR code */
-            height: 120px;
+        #loading {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
         }
-    }
-</style>
+
+        /* Media queries pour les petits écrans */
+        @media (max-width: 600px) {
+            .container {
+                flex-direction: column; /* Disposition en colonne sur les petits écrans */
+                align-items: center; /* Centrer les éléments */
+                padding: 15px; /* Réduire le padding */
+            }
+
+            .qr-section {
+                margin-top: 20px; /* Espacement entre les détails et le QR code */
+            }
+
+            h1 {
+                font-size: 20px; /* Réduire la taille du titre */
+            }
+
+            .details {
+                font-size: 14px; /* Réduire la taille de la police */
+            }
+
+            #receiptok {
+                font-size: 16px; /* Réduire la taille de la police */
+            }
+
+            #qrcode {
+                width: 120px; /* Réduire la taille du QR code */
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="details-section">
+            <h1>Détails du Reçu</h1>
+            <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
+            <div id="receiptDetails"></div> <!-- Message d'erreur -->
+
+            <div class="details">
+                <label for="nomClient">Nom du client:</label>
+                <span id="nomClient">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="objetPayment">Objet du paiement:</label>
+                <span id="objetPayment">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="datePayment">Date du paiement:</label>
+                <span id="datePayment">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="moisConcerne">Mois concerné:</label>
+                <span id="moisConcerne">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="montant">Montant:</label>
+                <span id="montant">Chargement...</span>
+            </div>
+
+            <!-- Message de succès -->
+            <div id="receiptok"></div>
+        </div>
+
+        <div class="qr-section">
+            <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
+        </div>
+    </div>
+</body>
+</html>
