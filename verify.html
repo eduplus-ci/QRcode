@@ -16,7 +16,7 @@
             apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
             authDomain: "databasere-e2d71.firebaseapp.com",
             projectId: "databasere-e2d71",
-            storageBucket: "databasere-e2d71.firebasestorage.app",
+            storageBucket: "databasere-e2d71.appspot.com",
             messagingSenderId: "83464780951",
             appId: "1:83464780951:web:47c0846b383418a2abfdd2",
             measurementId: "G-47B4QRQTYX"
@@ -103,18 +103,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            min-width: 800px; /* Largeur minimale */
+            overflow-x: auto; /* Défilement horizontal si nécessaire */
         }
 
         .container {
+            width: 800px; /* Largeur fixe */
+            margin: 0 auto; /* Centrer horizontalement */
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            width: 100%;
-            max-width: 800px;
             display: flex;
             gap: 20px;
+            flex-wrap: nowrap; /* Empêcher le retour à la ligne */
+            overflow: hidden; /* Empêcher le débordement */
         }
 
         .details-section {
@@ -122,9 +126,9 @@
         }
 
         .qr-section {
-            flex: 0 0 auto; /* Le QR code ne grandit pas et ne rétrécit pas */
+            flex-shrink: 0; /* Empêcher le rétrécissement */
             display: flex;
-            align-items: center; /* Centrer verticalement le QR code */
+            align-items: center;
         }
 
         h1 {
@@ -133,9 +137,9 @@
         }
 
         .details {
-            font-size: 16px;
+            font-size: 16px; /* Taille de police fixe */
             color: #333;
-            margin-bottom: 15px;
+            margin-bottom: 15px; /* Espacement fixe */
         }
 
         .details label {
@@ -158,11 +162,11 @@
             font-weight: bold;
             color: #3e8e41;
             text-align: center;
-            margin-top: 30px; /* Espacement de deux lignes après le montant */
-            display: none; /* Masqué par défaut */
-            width: 100%; /* Occupe toute la largeur */
-            white-space: normal; /* Permettre le retour à la ligne */
-            word-wrap: break-word; /* Casser les mots longs si nécessaire */
+            margin-top: 30px;
+            display: none;
+            width: 100%;
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         #loading {
@@ -173,7 +177,7 @@
     </style>
 </head>
 <body>
-    <div class="container" style="width: 800px;">
+    <div class="container">
         <div class="details-section">
             <h1>Détails du Reçu</h1>
             <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
