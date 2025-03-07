@@ -116,28 +116,19 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 20px;
             display: flex;
-            flex-direction: column; /* Disposition en colonne */
             gap: 20px;
             flex-wrap: nowrap; /* Empêcher le retour à la ligne */
             overflow: hidden; /* Empêcher le débordement */
-            min-height: 100vh; /* Prendre toute la hauteur de l'écran */
-        }
-
-        .content-wrapper {
-            display: flex;
-            gap: 20px;
         }
 
         .details-section {
-            flex: 1; /* Prendre l'espace disponible */
-            display: flex;
-            flex-direction: column;
+            flex: 1;
         }
 
         .qr-section {
             flex-shrink: 0; /* Empêcher le rétrécissement */
             display: flex;
-            align-items: flex-start; /* Aligner le QR code en haut */
+            align-items: center;
         }
 
         h1 {
@@ -170,11 +161,12 @@
             font-size: 18px;
             font-weight: bold;
             color: #3e8e41;
-            text-align: center; /* Centrer le texte horizontalement */
-            margin-top: auto; /* Pousser le message vers le bas */
-            display: none; /* Masqué par défaut */
-            width: 100%; /* Occuper toute la largeur */
-            padding-top: 20px; /* Espacement au-dessus du message */
+            text-align: center;
+            margin-top: 30px;
+            display: none;
+            width: 100%;
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         #loading {
@@ -186,41 +178,39 @@
 </head>
 <body>
     <div class="container">
-        <div class="content-wrapper">
-            <div class="details-section">
-                <h1>Détails du Reçu</h1>
-                <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
-                <div id="receiptDetails"></div> <!-- Message d'erreur -->
+        <div class="details-section">
+            <h1>Détails du Reçu</h1>
+            <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
+            <div id="receiptDetails"></div> <!-- Message d'erreur -->
 
-                <div class="details">
-                    <label for="nomClient">Nom du client:</label>
-                    <span id="nomClient">Chargement...</span>
-                </div>
-                <div class="details">
-                    <label for="objetPayment">Objet du paiement:</label>
-                    <span id="objetPayment">Chargement...</span>
-                </div>
-                <div class="details">
-                    <label for="datePayment">Date du paiement:</label>
-                    <span id="datePayment">Chargement...</span>
-                </div>
-                <div class="details">
-                    <label for="moisConcerne">Mois concerné:</label>
-                    <span id="moisConcerne">Chargement...</span>
-                </div>
-                <div class="details">
-                    <label for="montant">Montant:</label>
-                    <span id="montant">Chargement...</span>
-                </div>
+            <div class="details">
+                <label for="nomClient">Nom du client:</label>
+                <span id="nomClient">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="objetPayment">Objet du paiement:</label>
+                <span id="objetPayment">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="datePayment">Date du paiement:</label>
+                <span id="datePayment">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="moisConcerne">Mois concerné:</label>
+                <span id="moisConcerne">Chargement...</span>
+            </div>
+            <div class="details">
+                <label for="montant">Montant:</label>
+                <span id="montant">Chargement...</span>
             </div>
 
-            <div class="qr-section">
-                <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
-            </div>
+            <!-- Message de succès -->
+            <div id="receiptok"></div>
         </div>
 
-        <!-- Message de succès -->
-        <div id="receiptok"></div>
+        <div class="qr-section">
+            <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
+        </div>
     </div>
 </body>
 </html>
