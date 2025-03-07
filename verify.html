@@ -138,6 +138,7 @@
 
         .container {
             width: 800px; /* Largeur fixe */
+            min-height: 600px; /* Hauteur minimale */
             margin: 0 auto; /* Centrer horizontalement */
             background-color: #ffffff;
             border-radius: 8px;
@@ -146,16 +147,28 @@
             display: flex;
             gap: 20px;
             flex-wrap: nowrap; /* Empêcher le retour à la ligne */
+
+            /* Ajout de l'image de fond */
+            background-image: url('recufon.png'); /* Chemin de l'image */
+            background-size: cover; /* Couvre tout le container sans déformation */
+            background-position: center; /* Centre l'image */
+            background-repeat: no-repeat; /* Empêche la répétition de l'image */
         }
 
         .details-section {
             flex: 1;
+            background-color: rgba(255, 255, 255, 0.8); /* Fond semi-transparent pour améliorer la lisibilité */
+            padding: 20px;
+            border-radius: 8px;
         }
 
         .qr-section {
             flex-shrink: 0; /* Empêcher le rétrécissement */
             display: flex;
             align-items: center;
+            background-color: rgba(255, 255, 255, 0.8); /* Fond semi-transparent pour améliorer la lisibilité */
+            padding: 20px;
+            border-radius: 8px;
         }
 
         h1 {
