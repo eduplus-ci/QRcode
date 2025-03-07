@@ -114,18 +114,18 @@
             width: 100%;
             max-width: 800px;
             display: flex;
-            gap: 20px;
+            flex-direction: column; /* Changement en colonne pour aligner les éléments verticalement */
         }
 
         .details-section {
-            flex: 1;
+            width: 100%; /* Occupe toute la largeur */
         }
 
         .qr-section {
-            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-top: 20px; /* Espacement entre les détails et le QR code */
         }
 
         h1 {
@@ -161,6 +161,7 @@
             text-align: center;
             margin-top: 30px; /* Espacement de deux lignes après le montant */
             display: none; /* Masqué par défaut */
+            width: 100%; /* Occupe toute la largeur */
         }
 
         #loading {
