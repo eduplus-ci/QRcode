@@ -30,8 +30,20 @@
         // Fonction pour vérifier la largeur de l'écran
         function checkScreenWidth() {
             if (window.innerWidth < 700) {
-                alert("Veuillez passer en mode paysage pour visionner le reçu correctement.");
+                showCustomAlert();
             }
+        }
+
+        // Fonction pour afficher l'alerte personnalisée
+        function showCustomAlert() {
+            const customAlert = document.getElementById("customAlert");
+            customAlert.style.display = "flex"; // Afficher l'alerte
+        }
+
+        // Fonction pour fermer l'alerte personnalisée
+        function closeCustomAlert() {
+            const customAlert = document.getElementById("customAlert");
+            customAlert.style.display = "none"; // Masquer l'alerte
         }
 
         // Vérifier la largeur de l'écran au chargement de la page
@@ -183,6 +195,48 @@
             font-weight: bold;
             color: #333;
         }
+
+        /* Style pour l'alerte personnalisée */
+        #customAlert {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none; /* Masqué par défaut */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .alert-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .alert-content p {
+            font-size: 20px; /* Taille du texte augmentée */
+            font-weight: bold; /* Texte en gras */
+            margin-bottom: 20px;
+        }
+
+        .alert-content button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .alert-content button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -219,6 +273,14 @@
 
         <div class="qr-section">
             <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
+        </div>
+    </div>
+
+    <!-- Alerte personnalisée -->
+    <div id="customAlert">
+        <div class="alert-content">
+            <p>Veuillez passer en mode paysage pour visionner le reçu correctement.</p>
+            <button onclick="closeCustomAlert()">OK</button>
         </div>
     </div>
 </body>
