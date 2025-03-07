@@ -112,7 +112,7 @@
                 const imgHeight = (canvas.height * imgWidth) / canvas.width; // Calculer la hauteur proportionnelle
 
                 pdf.addImage(imgData, "JPEG", 10, 10, imgWidth, imgHeight);
-                pdf.save("reçu.pdf"); // Nom du fichier
+                pdf.save("reçu.pdf"); // Télécharger le PDF
 
                 // Réafficher l'élément receiptok après le téléchargement
                 receiptok.style.display = "block";
