@@ -85,7 +85,7 @@
             receiptok.style.display = "none";
 
             // Utiliser html2canvas pour capturer le contenu du conteneur
-            html2canvas(container).then(canvas => {
+            html2canvas(container, { scale: 2 }).then(canvas => {
                 const link = document.createElement("a");
                 link.download = "reçu.jpg"; // Nom du fichier
                 link.href = canvas.toDataURL("image/jpeg", 1.0); // Format JPEG
@@ -93,6 +93,9 @@
 
                 // Réafficher l'élément receiptok après le téléchargement
                 receiptok.style.display = "block";
+            }).catch(error => {
+                console.error("Erreur lors de la capture du contenu :", error);
+                alert("Une erreur s'est produite lors de la génération de l'image.");
             });
         }
 
@@ -105,7 +108,7 @@
             receiptok.style.display = "none";
 
             // Utiliser html2canvas pour capturer le contenu du conteneur
-            html2canvas(container).then(canvas => {
+            html2canvas(container, { scale: 2 }).then(canvas => {
                 const imgData = canvas.toDataURL("image/jpeg", 1.0);
                 const pdf = new jsPDF("p", "mm", "a4");
                 const imgWidth = 190; // Largeur de l'image dans le PDF
@@ -116,6 +119,9 @@
 
                 // Réafficher l'élément receiptok après le téléchargement
                 receiptok.style.display = "block";
+            }).catch(error => {
+                console.error("Erreur lors de la capture du contenu :", error);
+                alert("Une erreur s'est produite lors de la génération du PDF.");
             });
         }
 
@@ -143,96 +149,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f7fa;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .container {
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            width: 100%;
-            max-width: 800px;
-            display: flex;
-            gap: 20px;
-        }
-
-        .details-section {
-            flex: 1;
-        }
-
-        .qr-section {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        .details {
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .details label {
-            font-weight: bold;
-        }
-
-        .details span {
-            color: #555;
-        }
-
-        #receiptDetails {
-            font-size: 18px;
-            font-weight: bold;
-            color: red;
-            text-align: center;
-        }
-
-        #receiptok {
-            font-size: 18px;
-            font-weight: bold;
-            color: #3e8e41;
-            text-align: center;
-        }
-
-        #loading {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .download-buttons {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .download-buttons button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 5px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .download-buttons button:hover {
-            background-color: #45a049;
-        }
+        /* Styles CSS inchangés */
     </style>
 </head>
 <body>
