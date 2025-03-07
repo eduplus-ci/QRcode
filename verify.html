@@ -37,13 +37,17 @@
         // Fonction pour afficher l'alerte personnalisée
         function showCustomAlert() {
             const customAlert = document.getElementById("customAlert");
-            customAlert.style.display = "flex"; // Afficher l'alerte
+            if (customAlert) {
+                customAlert.style.display = "flex"; // Afficher l'alerte
+            }
         }
 
         // Fonction pour fermer l'alerte personnalisée
         function closeCustomAlert() {
             const customAlert = document.getElementById("customAlert");
-            customAlert.style.display = "none"; // Masquer l'alerte
+            if (customAlert) {
+                customAlert.style.display = "none"; // Masquer l'alerte
+            }
         }
 
         // Vérifier la largeur de l'écran au chargement de la page
