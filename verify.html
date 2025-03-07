@@ -16,7 +16,7 @@
             apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
             authDomain: "databasere-e2d71.firebaseapp.com",
             projectId: "databasere-e2d71",
-            storageBucket: "databasere-e2d71.appspot.com",
+            storageBucket: "databasere-e2d71.firebasestorage.app",
             messagingSenderId: "83464780951",
             appId: "1:83464780951:web:47c0846b383418a2abfdd2",
             measurementId: "G-47B4QRQTYX"
@@ -24,34 +24,37 @@
 
         // Initialisation de Firebase
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const analytics = getAnalytics(app);
+        const db = getFirestore(app); // Initialisation de Firestore
+        const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
 
         // Fonction pour récupérer un reçu par ID
         async function getReceiptById(receiptId) {
             try {
-                const docRef = doc(db, "recu", receiptId);
-                const docSnap = await getDoc(docRef);
+                const docRef = doc(db, "recu", receiptId);  // On récupère le document par ID
+                const docSnap = await getDoc(docRef);  // Obtenir le document
 
                 if (docSnap.exists()) {
+                    // Si le document existe, on affiche les données
                     const receiptData = docSnap.data();
                     document.getElementById("nomClient").innerText = receiptData.nomClient;
                     document.getElementById("objetPayment").innerText = receiptData.objetPayment;
                     document.getElementById("datePayment").innerText = receiptData.datePayment;
                     document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
-                    document.getElementById("montant").innerText = `${receiptData.montant} franc CFA`;
+                    document.getElementById("montant").innerText = `${receiptData.montant} franc CFA`; // Ajout de "franc CFA"
                     document.getElementById("receiptok").innerText = "Votre reçu est bien authentique, merci pour votre confiance...";
-                    document.getElementById("receiptok").style.display = "block";
+                    document.getElementById("receiptok").style.display = "block"; // Afficher le message
 
+                    // Générer le QR code
                     generateQRCode(receiptId);
                 } else {
+                    // Si le document n'existe pas
                     document.getElementById("receiptDetails").innerText = "Aucun reçu trouvé pour cet ID.";
                 }
             } catch (error) {
                 console.error("Erreur lors de la récupération du reçu :", error);
                 document.getElementById("receiptDetails").innerText = "Une erreur s'est produite lors de la récupération du reçu.";
             } finally {
-                document.getElementById("loading").style.display = "none";
+                document.getElementById("loading").style.display = "none"; // Masquer le spinner
             }
         }
 
@@ -60,11 +63,13 @@
             const qrCodeUrl = `https://eduplus-ci.github.io/QRcode/verify.html?id=${receiptId}`;
             const qrCodeContainer = document.getElementById("qrcode");
 
+            // Effacer le contenu précédent du conteneur QR code
             qrCodeContainer.innerHTML = "";
 
+            // Générer le nouveau QR code
             new QRCode(qrCodeContainer, {
                 text: qrCodeUrl,
-                width: 150,
+                width: 150, // Taille réduite du QR code
                 height: 150,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
@@ -77,10 +82,12 @@
         const receiptId = urlParams.get('id');
 
         if (receiptId) {
+            // Si un ID est passé dans l'URL, on récupère le reçu correspondant
             getReceiptById(receiptId);
         } else {
+            // Si l'ID n'est pas passé dans l'URL
             document.getElementById("receiptDetails").innerText = "ID de reçu manquant dans l'URL.";
-            document.getElementById("loading").style.display = "none";
+            document.getElementById("loading").style.display = "none"; // Masquer le spinner
         }
     </script>
 
@@ -115,9 +122,9 @@
         }
 
         .qr-section {
-            flex: 0 0 auto;
+            flex: 0 0 auto; /* Le QR code ne grandit pas et ne rétrécit pas */
             display: flex;
-            align-items: center;
+            align-items: center; /* Centrer verticalement le QR code */
         }
 
         h1 {
@@ -151,11 +158,11 @@
             font-weight: bold;
             color: #3e8e41;
             text-align: center;
-            margin-top: 30px;
-            display: none;
-            width: 100%;
-            white-space: normal;
-            word-wrap: break-word;
+            margin-top: 30px; /* Espacement de deux lignes après le montant */
+            display: none; /* Masqué par défaut */
+            width: 100%; /* Occupe toute la largeur */
+            white-space: normal; /* Permettre le retour à la ligne */
+            word-wrap: break-word; /* Casser les mots longs si nécessaire */
         }
 
         #loading {
@@ -163,54 +170,14 @@
             font-weight: bold;
             color: #333;
         }
-
-        @media screen and (max-width: 600px) {
-            body {
-                transform: rotate(90deg);
-                transform-origin: left top;
-                width: 100vh;
-                height: 100vw;
-                overflow-x: hidden;
-                position: absolute;
-                top: 100%;
-                left: 0;
-            }
-
-            .container {
-                flex-direction: column;
-                width: 100vw;
-                height: 100vh;
-                padding: 10px;
-            }
-
-            .qr-section {
-                margin-top: 20px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
-            .details {
-                font-size: 14px;
-            }
-
-            #receiptok {
-                font-size: 16px;
-            }
-
-            #rotateMessage {
-                display: block;
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" style="width: 800px;">
         <div class="details-section">
             <h1>Détails du Reçu</h1>
-            <div id="loading">Chargement en cours...</div>
-            <div id="receiptDetails"></div>
+            <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
+            <div id="receiptDetails"></div> <!-- Message d'erreur -->
 
             <div class="details">
                 <label for="nomClient">Nom du client:</label>
@@ -233,14 +200,13 @@
                 <span id="montant">Chargement...</span>
             </div>
 
+            <!-- Message de succès -->
             <div id="receiptok"></div>
         </div>
 
         <div class="qr-section">
-            <div id="qrcode"></div>
+            <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
         </div>
     </div>
-
-    <div id="rotateMessage">Veuillez tourner votre appareil en mode paysage pour une meilleure expérience.</div>
 </body>
 </html>
