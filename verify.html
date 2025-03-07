@@ -16,7 +16,7 @@
             apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
             authDomain: "databasere-e2d71.firebaseapp.com",
             projectId: "databasere-e2d71",
-            storageBucket: "databasere-e2d71.appspot.com",
+            storageBucket: "databasere-e2d71.firebasestorage.app",
             messagingSenderId: "83464780951",
             appId: "1:83464780951:web:47c0846b383418a2abfdd2",
             measurementId: "G-47B4QRQTYX"
@@ -36,23 +36,23 @@
                 if (docSnap.exists()) {
                     // Si le document existe, on affiche les données
                     const receiptData = docSnap.data();
-                    document.getElementById("nomClient").textContent = receiptData.nomClient;
-                    document.getElementById("objetPayment").textContent = receiptData.objetPayment;
-                    document.getElementById("datePayment").textContent = receiptData.datePayment;
-                    document.getElementById("moisConcerne").textContent = receiptData.moisConcerne;
-                    document.getElementById("montant").textContent = `${receiptData.montant} franc CFA`; // Ajout de "franc CFA"
-                    document.getElementById("receiptok").textContent = "Votre reçu est bien authentique, merci pour votre confiance...";
+                    document.getElementById("nomClient").innerText = receiptData.nomClient;
+                    document.getElementById("objetPayment").innerText = receiptData.objetPayment;
+                    document.getElementById("datePayment").innerText = receiptData.datePayment;
+                    document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
+                    document.getElementById("montant").innerText = `${receiptData.montant} franc CFA`; // Ajout de "franc CFA"
+                    document.getElementById("receiptok").innerText = "Votre reçu est bien authentique, merci pour votre confiance...";
                     document.getElementById("receiptok").style.display = "block"; // Afficher le message
 
                     // Générer le QR code
                     generateQRCode(receiptId);
                 } else {
                     // Si le document n'existe pas
-                    document.getElementById("receiptDetails").textContent = "Aucun reçu trouvé pour cet ID.";
+                    document.getElementById("receiptDetails").innerText = "Aucun reçu trouvé pour cet ID.";
                 }
             } catch (error) {
                 console.error("Erreur lors de la récupération du reçu :", error);
-                document.getElementById("receiptDetails").textContent = "Une erreur s'est produite lors de la récupération du reçu.";
+                document.getElementById("receiptDetails").innerText = "Une erreur s'est produite lors de la récupération du reçu.";
             } finally {
                 document.getElementById("loading").style.display = "none"; // Masquer le spinner
             }
@@ -86,7 +86,7 @@
             getReceiptById(receiptId);
         } else {
             // Si l'ID n'est pas passé dans l'URL
-            document.getElementById("receiptDetails").textContent = "ID de reçu manquant dans l'URL.";
+            document.getElementById("receiptDetails").innerText = "ID de reçu manquant dans l'URL.";
             document.getElementById("loading").style.display = "none"; // Masquer le spinner
         }
     </script>
@@ -103,7 +103,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh; /* Utiliser min-height pour éviter les problèmes de défilement */
+            height: 100vh;
         }
 
         .container {
@@ -111,9 +111,8 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            width: 800px; /* Largeur fixe */
-            height: 600px; /* Hauteur fixe */
-            overflow: auto; /* Permettre le défilement si le contenu dépasse */
+            width: 100%;
+            max-width: 800px;
             display: flex;
             gap: 20px;
         }
@@ -131,7 +130,6 @@
         h1 {
             text-align: center;
             color: #333;
-            font-size: 24px; /* Taille de police fixe */
         }
 
         .details {
