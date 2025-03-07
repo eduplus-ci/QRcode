@@ -27,6 +27,19 @@
         const db = getFirestore(app); // Initialisation de Firestore
         const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
 
+        // Fonction pour vérifier la largeur de l'écran
+        function checkScreenWidth() {
+            if (window.innerWidth < 700) {
+                alert("Veuillez passer en mode paysage pour visionner le reçu correctement.");
+            }
+        }
+
+        // Vérifier la largeur de l'écran au chargement de la page
+        window.addEventListener("load", checkScreenWidth);
+
+        // Optionnel : Vérifier aussi lors du redimensionnement de la fenêtre
+        window.addEventListener("resize", checkScreenWidth);
+
         // Fonction pour récupérer un reçu par ID
         async function getReceiptById(receiptId) {
             try {
