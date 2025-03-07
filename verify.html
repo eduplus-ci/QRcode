@@ -126,6 +126,7 @@
             min-height: 100vh;
             min-width: 800px; /* Largeur minimale */
             overflow-x: auto; /* Défilement horizontal si nécessaire */
+            overflow-y: auto; /* Défilement vertical si nécessaire */
         }
 
         .container {
@@ -138,7 +139,6 @@
             display: flex;
             gap: 20px;
             flex-wrap: nowrap; /* Empêcher le retour à la ligne */
-            overflow: hidden; /* Empêcher le débordement */
         }
 
         .details-section {
@@ -193,19 +193,6 @@
             font-size: 18px;
             font-weight: bold;
             color: #333;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                width: 100%;
-                padding: 10px;
-            }
-
-            .qr-section {
-                justify-content: center;
-                margin-top: 20px;
-            }
         }
     </style>
 </head>
