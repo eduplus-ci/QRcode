@@ -114,17 +114,17 @@
             width: 100%;
             max-width: 800px;
             display: flex;
-            gap: 20px;
+            flex-direction: column; /* Disposition en colonne */
         }
 
         .details-section {
-            flex: 1;
+            width: 100%; /* Occupe toute la largeur */
         }
 
         .qr-section {
-            flex: 0 0 auto; /* Le QR code ne grandit pas et ne rétrécit pas */
             display: flex;
-            align-items: center; /* Centrer verticalement le QR code */
+            justify-content: flex-end; /* Aligner le QR code à droite */
+            margin-top: 20px; /* Espacement entre les détails et le QR code */
         }
 
         h1 {
