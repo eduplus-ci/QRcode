@@ -116,13 +116,17 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 20px;
             display: flex;
+            flex-direction: column; /* Disposition en colonne */
             gap: 20px;
             flex-wrap: nowrap; /* Empêcher le retour à la ligne */
             overflow: hidden; /* Empêcher le débordement */
+            min-height: 100vh; /* Prendre toute la hauteur de l'écran */
         }
 
         .details-section {
-            flex: 1;
+            flex: 1; /* Prendre l'espace disponible */
+            display: flex;
+            flex-direction: column;
         }
 
         .qr-section {
@@ -161,12 +165,11 @@
             font-size: 18px;
             font-weight: bold;
             color: #3e8e41;
-            text-align: center;
-            margin-top: 30px;
-            display: none;
-            width: 100%;
-            white-space: normal;
-            word-wrap: break-word;
+            text-align: center; /* Centrer le texte horizontalement */
+            margin-top: auto; /* Pousser le message vers le bas */
+            display: none; /* Masqué par défaut */
+            width: 100%; /* Occuper toute la largeur */
+            padding-top: 20px; /* Espacement au-dessus du message */
         }
 
         #loading {
