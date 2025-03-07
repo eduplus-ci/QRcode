@@ -68,11 +68,54 @@
             // Générer le nouveau QR code
             new QRCode(qrCodeContainer, {
                 text: qrCodeUrl,
-                width: 200,
-                height: 200,
+                width: 150, // Taille réduite du QR code
+                height: 150,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        // Fonction pour télécharger le reçu en image (JPEG)
+        function downloadReceiptAsImage() {
+            const container = document.querySelector(".container");
+            const receiptok = document.getElementById("receiptok");
+
+            // Masquer l'élément receiptok avant de capturer
+            receiptok.style.display = "none";
+
+            // Utiliser html2canvas pour capturer le contenu du conteneur
+            html2canvas(container).then(canvas => {
+                const link = document.createElement("a");
+                link.download = "reçu.jpg"; // Nom du fichier
+                link.href = canvas.toDataURL("image/jpeg", 1.0); // Format JPEG
+                link.click();
+
+                // Réafficher l'élément receiptok après le téléchargement
+                receiptok.style.display = "block";
+            });
+        }
+
+        // Fonction pour télécharger le reçu en PDF
+        function downloadReceiptAsPDF() {
+            const container = document.querySelector(".container");
+            const receiptok = document.getElementById("receiptok");
+
+            // Masquer l'élément receiptok avant de capturer
+            receiptok.style.display = "none";
+
+            // Utiliser html2canvas pour capturer le contenu du conteneur
+            html2canvas(container).then(canvas => {
+                const imgData = canvas.toDataURL("image/jpeg", 1.0);
+                const pdf = new jsPDF("p", "mm", "a4");
+                const imgWidth = 190; // Largeur de l'image dans le PDF
+                const imgHeight = (canvas.height * imgWidth) / canvas.width; // Calculer la hauteur proportionnelle
+
+                pdf.addImage(imgData, "JPEG", 10, 10, imgWidth, imgHeight);
+                pdf.save("reçu.pdf"); // Nom du fichier
+
+                // Réafficher l'élément receiptok après le téléchargement
+                receiptok.style.display = "block";
             });
         }
 
@@ -92,6 +135,12 @@
 
     <!-- Importation de la bibliothèque QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Importation de la bibliothèque html2canvas pour capturer le contenu -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Importation de la bibliothèque jsPDF pour générer des PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         body {
@@ -165,6 +214,25 @@
             font-weight: bold;
             color: #333;
         }
+
+        .download-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .download-buttons button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .download-buttons button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -194,6 +262,11 @@
             <div class="details">
                 <label for="montant">Montant:</label>
                 <span id="montant">Chargement...</span>
+            </div>
+
+            <div class="download-buttons">
+                <button onclick="downloadReceiptAsImage()">Télécharger en JPEG</button>
+                <button onclick="downloadReceiptAsPDF()">Télécharger en PDF</button>
             </div>
         </div>
 
