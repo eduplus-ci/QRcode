@@ -146,6 +146,13 @@
             display: flex;
             gap: 20px;
             flex-wrap: nowrap; /* Empêcher le retour à la ligne */
+
+
+            /* Ajout de l'image de fond */
+            background-image: url('fondp.png'); /* Chemin de l'image */
+            background-size: cover; /* Couvre tout le container sans déformation */
+            background-position: center; /* Centre l'image */
+            background-repeat: no-repeat; /* Empêche la répétition de l'image */
         }
 
         .details-section {
@@ -206,7 +213,7 @@
 <body>
     <div class="container">
         <div class="details-section">
-            <h1>Détails du Reçu</h1>
+            <h1>Edu'plus Reçu de Paiement</h1>
             <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
             <div id="receiptDetails"></div> <!-- Message d'erreur -->
 
