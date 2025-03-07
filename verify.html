@@ -114,18 +114,18 @@
             width: 100%;
             max-width: 800px;
             display: flex;
-            flex-direction: column; /* Changement en colonne pour aligner les éléments verticalement */
+            gap: 20px;
         }
 
         .details-section {
-            width: 100%; /* Occupe toute la largeur */
+            flex: 1;
         }
 
         .qr-section {
+            flex: 0 0 auto; /* Le QR code ne grandit pas et ne rétrécit pas */
             display: flex;
             justify-content: center;
-            align-items: center;
-            margin-top: 20px; /* Espacement entre les détails et le QR code */
+            align-items: flex-start; /* Aligner en haut */
         }
 
         h1 {
@@ -162,6 +162,8 @@
             margin-top: 30px; /* Espacement de deux lignes après le montant */
             display: none; /* Masqué par défaut */
             width: 100%; /* Occupe toute la largeur */
+            white-space: normal; /* Permettre le retour à la ligne */
+            word-wrap: break-word; /* Casser les mots longs si nécessaire */
         }
 
         #loading {
