@@ -40,8 +40,9 @@
                     document.getElementById("objetPayment").innerText = receiptData.objetPayment;
                     document.getElementById("datePayment").innerText = receiptData.datePayment;
                     document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
-                    document.getElementById("montant").innerText = receiptData.montant;
+                    document.getElementById("montant").innerText = `${receiptData.montant} franc CFA`; // Ajout de "franc CFA"
                     document.getElementById("receiptok").innerText = "Votre reçu est bien authentique, merci pour votre confiance...";
+                    document.getElementById("receiptok").style.display = "block"; // Afficher le message
 
                     // Générer le QR code
                     generateQRCode(receiptId);
@@ -158,6 +159,8 @@
             font-weight: bold;
             color: #3e8e41;
             text-align: center;
+            margin-top: 30px; /* Espacement de deux lignes après le montant */
+            display: none; /* Masqué par défaut */
         }
 
         #loading {
@@ -173,7 +176,6 @@
             <h1>Détails du Reçu</h1>
             <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
             <div id="receiptDetails"></div> <!-- Message d'erreur -->
-            <div id="receiptok"></div> <!-- Message de succès -->
 
             <div class="details">
                 <label for="nomClient">Nom du client:</label>
@@ -195,6 +197,9 @@
                 <label for="montant">Montant:</label>
                 <span id="montant">Chargement...</span>
             </div>
+
+            <!-- Message de succès -->
+            <div id="receiptok"></div>
         </div>
 
         <div class="qr-section">
