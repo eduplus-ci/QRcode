@@ -123,6 +123,11 @@
             min-height: 100vh; /* Prendre toute la hauteur de l'écran */
         }
 
+        .content-wrapper {
+            display: flex;
+            gap: 20px;
+        }
+
         .details-section {
             flex: 1; /* Prendre l'espace disponible */
             display: flex;
@@ -132,7 +137,7 @@
         .qr-section {
             flex-shrink: 0; /* Empêcher le rétrécissement */
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* Aligner le QR code en haut */
         }
 
         h1 {
@@ -181,39 +186,41 @@
 </head>
 <body>
     <div class="container">
-        <div class="details-section">
-            <h1>Détails du Reçu</h1>
-            <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
-            <div id="receiptDetails"></div> <!-- Message d'erreur -->
+        <div class="content-wrapper">
+            <div class="details-section">
+                <h1>Détails du Reçu</h1>
+                <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
+                <div id="receiptDetails"></div> <!-- Message d'erreur -->
 
-            <div class="details">
-                <label for="nomClient">Nom du client:</label>
-                <span id="nomClient">Chargement...</span>
-            </div>
-            <div class="details">
-                <label for="objetPayment">Objet du paiement:</label>
-                <span id="objetPayment">Chargement...</span>
-            </div>
-            <div class="details">
-                <label for="datePayment">Date du paiement:</label>
-                <span id="datePayment">Chargement...</span>
-            </div>
-            <div class="details">
-                <label for="moisConcerne">Mois concerné:</label>
-                <span id="moisConcerne">Chargement...</span>
-            </div>
-            <div class="details">
-                <label for="montant">Montant:</label>
-                <span id="montant">Chargement...</span>
+                <div class="details">
+                    <label for="nomClient">Nom du client:</label>
+                    <span id="nomClient">Chargement...</span>
+                </div>
+                <div class="details">
+                    <label for="objetPayment">Objet du paiement:</label>
+                    <span id="objetPayment">Chargement...</span>
+                </div>
+                <div class="details">
+                    <label for="datePayment">Date du paiement:</label>
+                    <span id="datePayment">Chargement...</span>
+                </div>
+                <div class="details">
+                    <label for="moisConcerne">Mois concerné:</label>
+                    <span id="moisConcerne">Chargement...</span>
+                </div>
+                <div class="details">
+                    <label for="montant">Montant:</label>
+                    <span id="montant">Chargement...</span>
+                </div>
             </div>
 
-            <!-- Message de succès -->
-            <div id="receiptok"></div>
+            <div class="qr-section">
+                <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
+            </div>
         </div>
 
-        <div class="qr-section">
-            <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
-        </div>
+        <!-- Message de succès -->
+        <div id="receiptok"></div>
     </div>
 </body>
 </html>
