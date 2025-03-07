@@ -27,37 +27,6 @@
         const db = getFirestore(app); // Initialisation de Firestore
         const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
 
-        // Fonction pour vérifier l'orientation de l'écran
-        function checkOrientation() {
-            if (window.innerWidth < 700 || window.innerHeight > window.innerWidth) {
-                showCustomAlert();
-            } else {
-                closeCustomAlert();
-            }
-        }
-
-        // Fonction pour afficher l'alerte personnalisée
-        function showCustomAlert() {
-            const customAlert = document.getElementById("customAlert");
-            if (customAlert) {
-                customAlert.style.display = "flex"; // Afficher l'alerte
-            }
-        }
-
-        // Fonction pour fermer l'alerte personnalisée
-        function closeCustomAlert() {
-            const customAlert = document.getElementById("customAlert");
-            if (customAlert) {
-                customAlert.style.display = "none"; // Masquer l'alerte
-            }
-        }
-
-        // Vérifier l'orientation au chargement de la page
-        window.addEventListener("load", checkOrientation);
-
-        // Vérifier l'orientation lors du redimensionnement ou de la rotation de l'écran
-        window.addEventListener("resize", checkOrientation);
-
         // Fonction pour récupérer un reçu par ID
         async function getReceiptById(receiptId) {
             try {
@@ -201,64 +170,6 @@
             font-weight: bold;
             color: #333;
         }
-
-        /* Style pour l'alerte personnalisée */
-        #customAlert {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: none; /* Masqué par défaut */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .alert-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .alert-content p {
-            font-size: 20px; /* Taille du texte augmentée */
-            font-weight: bold; /* Texte en gras */
-            margin-bottom: 20px;
-        }
-
-        .alert-content button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .alert-content button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Icône de rotation */
-        .rotate-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-            animation: rotate 2s infinite linear;
-        }
-
-        @keyframes rotate {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
     </style>
 </head>
 <body>
@@ -295,15 +206,6 @@
 
         <div class="qr-section">
             <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
-        </div>
-    </div>
-
-    <!-- Alerte personnalisée -->
-    <div id="customAlert">
-        <div class="alert-content">
-            <div class="rotate-icon">🔄</div> <!-- Icône de rotation -->
-            <p>Veuillez passer en mode paysage pour visionner le reçu correctement.</p>
-            <button onclick="closeCustomAlert()">OK</button>
         </div>
     </div>
 </body>
