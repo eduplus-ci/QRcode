@@ -83,11 +83,17 @@
 
         // Fonction pour vérifier si des barres de défilement sont visibles
         function checkScrollbars() {
-            const hasVerticalScrollbar = document.documentElement.scrollHeight > document.documentElement.clientHeight;
-            const hasHorizontalScrollbar = document.documentElement.scrollWidth > document.documentElement.clientWidth;
+            // Vérifier l'orientation de l'écran
+            const isPortrait = window.matchMedia("(orientation: portrait)").matches;
 
-            if (hasVerticalScrollbar || hasHorizontalScrollbar) {
-                alert("Pour une meilleure visualisation, veuillez passer en mode paysage.");
+            // Si l'écran est en mode portrait, vérifier les barres de défilement
+            if (isPortrait) {
+                const hasVerticalScrollbar = document.documentElement.scrollHeight > document.documentElement.clientHeight;
+                const hasHorizontalScrollbar = document.documentElement.scrollWidth > document.documentElement.clientWidth;
+
+                if (hasVerticalScrollbar || hasHorizontalScrollbar) {
+                    alert("Pour une meilleure visualisation, veuillez passer en mode paysage.");
+                }
             }
         }
 
@@ -107,8 +113,9 @@
         // Vérifier les barres de défilement au chargement de la page
         window.addEventListener("load", checkScrollbars);
 
-        // Vérifier les barres de défilement lors du redimensionnement de la fenêtre
+        // Vérifier les barres de défilement lors du redimensionnement de la fenêtre ou du changement d'orientation
         window.addEventListener("resize", checkScrollbars);
+        window.addEventListener("orientationchange", checkScrollbars);
     </script>
 
     <!-- Importation de la bibliothèque QRCode.js -->
