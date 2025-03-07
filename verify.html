@@ -27,10 +27,12 @@
         const db = getFirestore(app); // Initialisation de Firestore
         const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
 
-        // Fonction pour vérifier la largeur de l'écran
-        function checkScreenWidth() {
-            if (window.innerWidth < 700) {
+        // Fonction pour vérifier l'orientation de l'écran
+        function checkOrientation() {
+            if (window.innerWidth < 700 || window.innerHeight > window.innerWidth) {
                 showCustomAlert();
+            } else {
+                closeCustomAlert();
             }
         }
 
@@ -50,11 +52,11 @@
             }
         }
 
-        // Vérifier la largeur de l'écran au chargement de la page
-        window.addEventListener("load", checkScreenWidth);
+        // Vérifier l'orientation au chargement de la page
+        window.addEventListener("load", checkOrientation);
 
-        // Optionnel : Vérifier aussi lors du redimensionnement de la fenêtre
-        window.addEventListener("resize", checkScreenWidth);
+        // Vérifier l'orientation lors du redimensionnement ou de la rotation de l'écran
+        window.addEventListener("resize", checkOrientation);
 
         // Fonction pour récupérer un reçu par ID
         async function getReceiptById(receiptId) {
@@ -241,6 +243,22 @@
         .alert-content button:hover {
             background-color: #0056b3;
         }
+
+        /* Icône de rotation */
+        .rotate-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+            animation: rotate 2s infinite linear;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -283,6 +301,7 @@
     <!-- Alerte personnalisée -->
     <div id="customAlert">
         <div class="alert-content">
+            <div class="rotate-icon">🔄</div> <!-- Icône de rotation -->
             <p>Veuillez passer en mode paysage pour visionner le reçu correctement.</p>
             <button onclick="closeCustomAlert()">OK</button>
         </div>
