@@ -30,6 +30,10 @@
         // Fonction pour récupérer un reçu par ID
         async function getReceiptById(receiptId) {
             try {
+                if (!receiptId) {
+                    throw new Error("ID de reçu manquant.");
+                }
+
                 const docRef = doc(db, "recu", receiptId);  // On récupère le document par ID
                 const docSnap = await getDoc(docRef);  // Obtenir le document
 
@@ -52,7 +56,7 @@
                 }
             } catch (error) {
                 console.error("Erreur lors de la récupération du reçu :", error);
-                document.getElementById("receiptDetails").innerText = "Une erreur s'est produite lors de la récupération du reçu.";
+                document.getElementById("receiptDetails").innerText = error.message || "Une erreur s'est produite lors de la récupération du reçu.";
             } finally {
                 document.getElementById("loading").style.display = "none"; // Masquer le spinner
             }
@@ -77,6 +81,16 @@
             });
         }
 
+        // Fonction pour vérifier si des barres de défilement sont visibles
+        function checkScrollbars() {
+            const hasVerticalScrollbar = document.documentElement.scrollHeight > document.documentElement.clientHeight;
+            const hasHorizontalScrollbar = document.documentElement.scrollWidth > document.documentElement.clientWidth;
+
+            if (hasVerticalScrollbar || hasHorizontalScrollbar) {
+                alert("Pour une meilleure visualisation, veuillez passer en mode paysage.");
+            }
+        }
+
         // Récupérer l'ID du reçu à partir de l'URL
         const urlParams = new URLSearchParams(window.location.search);
         const receiptId = urlParams.get('id');
@@ -89,10 +103,16 @@
             document.getElementById("receiptDetails").innerText = "ID de reçu manquant dans l'URL.";
             document.getElementById("loading").style.display = "none"; // Masquer le spinner
         }
+
+        // Vérifier les barres de défilement au chargement de la page
+        window.addEventListener("load", checkScrollbars);
+
+        // Vérifier les barres de défilement lors du redimensionnement de la fenêtre
+        window.addEventListener("resize", checkScrollbars);
     </script>
 
     <!-- Importation de la bibliothèque QRCode.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" async></script>
 
     <style>
         body {
@@ -173,6 +193,19 @@
             font-size: 18px;
             font-weight: bold;
             color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 100%;
+                padding: 10px;
+            }
+
+            .qr-section {
+                justify-content: center;
+                margin-top: 20px;
+            }
         }
     </style>
 </head>
