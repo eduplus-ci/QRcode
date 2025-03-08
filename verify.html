@@ -7,11 +7,7 @@
 
     <!-- Importation des SDK Firebase -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
-
-        // Configuration Firebase
+        // Configuration Firebase (à remplacer par des variables d'environnement côté serveur si possible)
         const firebaseConfig = {
             apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
             authDomain: "databasere-e2d71.firebaseapp.com",
@@ -23,9 +19,13 @@
         };
 
         // Initialisation de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app); // Initialisation de Firestore
-        const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
 
         // Fonction pour formater les nombres avec des séparateurs de milliers
         function formatNumberWithSpaces(number) {
@@ -39,35 +39,31 @@
                     throw new Error("ID de reçu manquant.");
                 }
 
-                const docRef = doc(db, "recu", receiptId);  // On récupère le document par ID
-                const docSnap = await getDoc(docRef);  // Obtenir le document
+                const docRef = doc(db, "recu", receiptId);
+                const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
-                    // Si le document existe, on affiche les données
                     const receiptData = docSnap.data();
                     document.getElementById("nomClient").innerText = receiptData.nomClient;
                     document.getElementById("objetPayment").innerText = receiptData.objetPayment;
                     document.getElementById("datePayment").innerText = receiptData.datePayment;
                     document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
 
-                    // Formater le montant avec des séparateurs de milliers
                     const formattedAmount = formatNumberWithSpaces(receiptData.montant);
-                    document.getElementById("montant").innerText = `${formattedAmount} franc CFA`; // Ajout de "franc CFA"
+                    document.getElementById("montant").innerText = `${formattedAmount} franc CFA`;
 
                     document.getElementById("receiptok").innerText = "© 2024 - Édu'Plus, Tous droits réservés.";
-                    document.getElementById("receiptok").style.display = "block"; // Afficher le message
+                    document.getElementById("receiptok").style.display = "block";
 
-                    // Générer le QR code
                     generateQRCode(receiptId);
                 } else {
-                    // Si le document n'existe pas
                     document.getElementById("receiptDetails").innerText = "Aucun reçu trouvé pour cet ID.";
                 }
             } catch (error) {
                 console.error("Erreur lors de la récupération du reçu :", error);
                 document.getElementById("receiptDetails").innerText = error.message || "Une erreur s'est produite lors de la récupération du reçu.";
             } finally {
-                document.getElementById("loading").style.display = "none"; // Masquer le spinner
+                document.getElementById("loading").style.display = "none";
             }
         }
 
@@ -76,13 +72,11 @@
             const qrCodeUrl = `https://eduplus-ci.github.io/QRcode/verify.html?id=${receiptId}`;
             const qrCodeContainer = document.getElementById("qrcode");
 
-            // Effacer le contenu précédent du conteneur QR code
             qrCodeContainer.innerHTML = "";
 
-            // Générer le nouveau QR code
             new QRCode(qrCodeContainer, {
                 text: qrCodeUrl,
-                width: 150, // Taille réduite du QR code
+                width: 150,
                 height: 150,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
@@ -92,10 +86,8 @@
 
         // Fonction pour vérifier si des barres de défilement sont visibles
         function checkScrollbars() {
-            // Vérifier l'orientation de l'écran
             const isPortrait = window.matchMedia("(orientation: portrait)").matches;
 
-            // Si l'écran est en mode portrait, vérifier les barres de défilement
             if (isPortrait) {
                 const hasVerticalScrollbar = document.documentElement.scrollHeight > document.documentElement.clientHeight;
                 const hasHorizontalScrollbar = document.documentElement.scrollWidth > document.documentElement.clientWidth;
@@ -111,18 +103,14 @@
         const receiptId = urlParams.get('id');
 
         if (receiptId) {
-            // Si un ID est passé dans l'URL, on récupère le reçu correspondant
             getReceiptById(receiptId);
         } else {
-            // Si l'ID n'est pas passé dans l'URL
             document.getElementById("receiptDetails").innerText = "ID de reçu manquant dans l'URL.";
-            document.getElementById("loading").style.display = "none"; // Masquer le spinner
+            document.getElementById("loading").style.display = "none";
         }
 
         // Vérifier les barres de défilement au chargement de la page
         window.addEventListener("load", checkScrollbars);
-
-        // Vérifier les barres de défilement lors du redimensionnement de la fenêtre ou du changement d'orientation
         window.addEventListener("resize", checkScrollbars);
         window.addEventListener("orientationchange", checkScrollbars);
     </script>
@@ -140,27 +128,25 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            min-width: 800px; /* Largeur minimale */
-            overflow-x: auto; /* Défilement horizontal si nécessaire */
-            overflow-y: auto; /* Défilement vertical si nécessaire */
+            min-width: 800px;
+            overflow-x: auto;
+            overflow-y: auto;
         }
 
         .container {
-            width: 800px; /* Largeur fixe */
-            margin: 0 auto; /* Centrer horizontalement */
+            width: 800px;
+            margin: 0 auto;
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 20px;
             display: flex;
             gap: 20px;
-            flex-wrap: nowrap; /* Empêcher le retour à la ligne */
-
-            /* Ajout de l'image de fond */
-            background-image: url('fondp.png'); /* Chemin de l'image */
-            background-size: cover; /* Couvre tout le container sans déformation */
-            background-position: center; /* Centre l'image */
-            background-repeat: no-repeat; /* Empêche la répétition de l'image */
+            flex-wrap: nowrap;
+            background-image: url('fondp.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .details-section {
@@ -168,7 +154,7 @@
         }
 
         .qr-section {
-            flex-shrink: 0; /* Empêcher le rétrécissement */
+            flex-shrink: 0;
             display: flex;
             align-items: center;
         }
@@ -179,9 +165,9 @@
         }
 
         .details {
-            font-size: 16px; /* Taille de police fixe */
+            font-size: 16px;
             color: #333;
-            margin-bottom: 15px; /* Espacement fixe */
+            margin-bottom: 15px;
         }
 
         .details label {
@@ -222,8 +208,8 @@
     <div class="container">
         <div class="details-section">
             <h1>Reçu de Paiement</h1>
-            <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
-            <div id="receiptDetails"></div> <!-- Message d'erreur -->
+            <div id="loading">Chargement en cours...</div>
+            <div id="receiptDetails"></div>
 
             <div class="details">
                 <label for="nomClient">Nom du client:</label>
@@ -246,12 +232,11 @@
                 <span id="montant">Chargement...</span>
             </div>
 
-            <!-- Message de succès -->
             <div id="receiptok"></div>
         </div>
 
         <div class="qr-section">
-            <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
+            <div id="qrcode"></div>
         </div>
     </div>
 </body>
