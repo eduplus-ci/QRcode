@@ -27,6 +27,11 @@
         const db = getFirestore(app); // Initialisation de Firestore
         const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
 
+        // Fonction pour formater les nombres avec des séparateurs de milliers
+        function formatNumberWithSpaces(number) {
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
         // Fonction pour récupérer un reçu par ID
         async function getReceiptById(receiptId) {
             try {
@@ -44,7 +49,11 @@
                     document.getElementById("objetPayment").innerText = receiptData.objetPayment;
                     document.getElementById("datePayment").innerText = receiptData.datePayment;
                     document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
-                    document.getElementById("montant").innerText = `${receiptData.montant} franc CFA`; // Ajout de "franc CFA"
+
+                    // Formater le montant avec des séparateurs de milliers
+                    const formattedAmount = formatNumberWithSpaces(receiptData.montant);
+                    document.getElementById("montant").innerText = `${formattedAmount} franc CFA`; // Ajout de "franc CFA"
+
                     document.getElementById("receiptok").innerText = "© 2024 - Édu'Plus, Tous droits réservés.";
                     document.getElementById("receiptok").style.display = "block"; // Afficher le message
 
@@ -146,7 +155,6 @@
             display: flex;
             gap: 20px;
             flex-wrap: nowrap; /* Empêcher le retour à la ligne */
-
 
             /* Ajout de l'image de fond */
             background-image: url('fondp.png'); /* Chemin de l'image */
