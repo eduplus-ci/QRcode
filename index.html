@@ -55,11 +55,16 @@
                 const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5)); // Limite à 5
                 const querySnapshot = await getDocs(q);
                 const linkContainer = document.getElementById("link-container");
-                linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    linkContainer.innerHTML += `<p><strong>Nom du client :</strong> ${data.nomClient} | <strong>Date du paiement :</strong> ${data.datePayment}</p>`;
-                });
+
+                if (querySnapshot.empty) {
+                    linkContainer.innerHTML = "<p>Votre base de données est vide.</p>";
+                } else {
+                    linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        linkContainer.innerHTML += `<p><strong>Nom du client :</strong> ${data.nomClient} | <strong>Date du paiement :</strong> ${data.datePayment}</p>`;
+                    });
+                }
             } catch (e) {
                 console.error("Erreur lors de la récupération des documents : ", e);
                 alert("Erreur lors de l'affichage des enregistrements");
@@ -71,10 +76,15 @@
             try {
                 const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5)); // Limite à 5
                 const querySnapshot = await getDocs(q);
-                querySnapshot.forEach(async (doc) => {
-                    await deleteDoc(doc.ref); // Supprime le document entier
-                });
-                alert("Les 5 derniers enregistrements ont été supprimés avec succès.");
+
+                if (querySnapshot.empty) {
+                    alert("Votre base de données est vide.");
+                } else {
+                    querySnapshot.forEach(async (doc) => {
+                        await deleteDoc(doc.ref); // Supprime le document entier
+                    });
+                    alert("Les 5 derniers enregistrements ont été supprimés avec succès.");
+                }
             } catch (e) {
                 console.error("Erreur lors de la suppression des documents : ", e);
                 alert("Erreur lors de la suppression des enregistrements");
@@ -220,11 +230,8 @@
             <input type="number" id="montant" placeholder="Montant" required>
 
             <button type="submit">Enregistrer le reçu</button>
-            <button type="button" id="btn-afficher" style="background-color: #80a6bd;" >Afficher les 5 derniers enregistrements</button>
-
-            <button type="button" type="hidden" id="btn-supprimer" style="background-color: red;"  >Supprimer les 5 derniers enregistrements</button>
-
-            
+            <button type="button" id="btn-afficher" style="background-color: #80a6bd;">Afficher les 5 derniers enregistrements</button>
+            <button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers enregistrements</button>
         </form>
 
         <!-- Conteneur pour afficher le lien -->
