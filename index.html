@@ -8,7 +8,7 @@
     <!-- Importation des SDK Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
         // Configuration Firebase
@@ -49,7 +49,7 @@
             }
         }
 
-        // Fonction pour afficher les 20 derniers enregistrements
+        // Fonction pour afficher les 20 derniers enregistrements (nom du client et date du paiement)
         async function afficherDerniersEnregistrements() {
             try {
                 const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(20));
@@ -57,7 +57,8 @@
                 const linkContainer = document.getElementById("link-container");
                 linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
                 querySnapshot.forEach((doc) => {
-                    linkContainer.innerHTML += `<p>${doc.data().nomClient} - ${doc.data().datePayment} - ${doc.data().montant}</p>`;
+                    const data = doc.data();
+                    linkContainer.innerHTML += `<p><strong>Nom du client :</strong> ${data.nomClient} | <strong>Date du paiement :</strong> ${data.datePayment}</p>`;
                 });
             } catch (e) {
                 console.error("Erreur lors de la récupération des documents : ", e);
@@ -65,13 +66,13 @@
             }
         }
 
-        // Fonction pour supprimer les 20 derniers enregistrements
+        // Fonction pour supprimer les 20 derniers enregistrements (documents entiers)
         async function supprimerDerniersEnregistrements() {
             try {
                 const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(20));
                 const querySnapshot = await getDocs(q);
                 querySnapshot.forEach(async (doc) => {
-                    await deleteDoc(doc.ref);
+                    await deleteDoc(doc.ref); // Supprime le document entier
                 });
                 alert("Les 20 derniers enregistrements ont été supprimés avec succès.");
             } catch (e) {
