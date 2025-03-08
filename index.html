@@ -8,7 +8,7 @@
     <!-- Importation des SDK Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
         // Configuration Firebase
@@ -16,7 +16,7 @@
             apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
             authDomain: "databasere-e2d71.firebaseapp.com",
             projectId: "databasere-e2d71",
-            storageBucket: "databasere-e2d71.firebasestorage.app",
+            storageBucket: "databasere-e2d71.appspot.com",
             messagingSenderId: "83464780951",
             appId: "1:83464780951:web:47c0846b383418a2abfdd2",
             measurementId: "G-47B4QRQTYX"
@@ -30,6 +30,7 @@
         // Fonction pour enregistrer les informations dans Firestore
         async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
             try {
+                // Ajout des données dans la collection "recu"
                 const docRef = await addDoc(collection(db, "recu"), {
                     nomClient: nomClient,
                     objetPayment: objetPayment,
@@ -38,12 +39,44 @@
                     montant: montant
                 });
 
+                // Afficher le lien avec l'ID du document créé
                 const link = `https://eduplus-ci.github.io/QRcode/verify.html?id=${docRef.id}`;
                 const linkContainer = document.getElementById("link-container");
                 linkContainer.innerHTML = `Votre reçu a été enregistré avec succès. Vous pouvez le vérifier ici : <a href="${link}" target="_blank">${link}</a>`;
             } catch (e) {
                 console.error("Erreur lors de l'ajout du document : ", e);
                 alert("Erreur lors de l'enregistrement du reçu");
+            }
+        }
+
+        // Fonction pour afficher les 20 derniers enregistrements
+        async function afficherDerniersEnregistrements() {
+            try {
+                const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(20));
+                const querySnapshot = await getDocs(q);
+                const linkContainer = document.getElementById("link-container");
+                linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
+                querySnapshot.forEach((doc) => {
+                    linkContainer.innerHTML += `<p>${doc.data().nomClient} - ${doc.data().datePayment} - ${doc.data().montant}</p>`;
+                });
+            } catch (e) {
+                console.error("Erreur lors de la récupération des documents : ", e);
+                alert("Erreur lors de l'affichage des enregistrements");
+            }
+        }
+
+        // Fonction pour supprimer les 20 derniers enregistrements
+        async function supprimerDerniersEnregistrements() {
+            try {
+                const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(20));
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                });
+                alert("Les 20 derniers enregistrements ont été supprimés avec succès.");
+            } catch (e) {
+                console.error("Erreur lors de la suppression des documents : ", e);
+                alert("Erreur lors de la suppression des enregistrements");
             }
         }
 
@@ -57,47 +90,18 @@
             const moisConcerne = document.getElementById("moisConcerne").value;
             const montant = document.getElementById("montant").value;
 
+            // Appeler la fonction pour enregistrer le reçu
             enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant);
-
+            
+            // Réinitialiser le formulaire après l'enregistrement
             document.getElementById("form-recu").reset();
         });
 
-        // Fonction pour afficher les 20 derniers enregistrements
-        async function afficherDerniersDocuments() {
-            const recuRef = collection(db, "recu");
-            const q = query(recuRef, orderBy("datePayment", "desc"), limit(20));  // Trier par datePayment décroissante, limite à 20 résultats
+        // Ajouter un événement pour le bouton "Afficher"
+        document.getElementById("btn-afficher").addEventListener("click", afficherDerniersEnregistrements);
 
-            try {
-                const querySnapshot = await getDocs(q);
-                let output = "<ul>";
-                querySnapshot.forEach((doc) => {
-                    output += `<li>Client: ${doc.data().nomClient}, Paiement: ${doc.data().montant} EUR, Date: ${doc.data().datePayment}</li>`;
-                });
-                output += "</ul>";
-                document.getElementById("documents-list").innerHTML = output;
-            } catch (e) {
-                console.error("Erreur lors de la récupération des documents: ", e);
-            }
-        }
-
-        // Fonction pour supprimer les 20 derniers enregistrements
-        async function supprimerDerniersDocuments() {
-            const recuRef = collection(db, "recu");
-            const q = query(recuRef, orderBy("datePayment", "desc"), limit(20));
-
-            try {
-                const querySnapshot = await getDocs(q);
-                querySnapshot.forEach(async (doc) => {
-                    await deleteDoc(doc.ref);
-                    console.log(`Document ${doc.id} supprimé`);
-                });
-
-                // Rafraîchir la liste après la suppression
-                afficherDerniersDocuments();
-            } catch (e) {
-                console.error("Erreur lors de la suppression des documents: ", e);
-            }
-        }
+        // Ajouter un événement pour le bouton "Supprimer"
+        document.getElementById("btn-supprimer").addEventListener("click", supprimerDerniersEnregistrements);
     </script>
 
     <style>
@@ -193,11 +197,6 @@
             text-align: center;
             font-size: 16px;
         }
-
-        #documents-list {
-            margin-top: 20px;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
@@ -220,16 +219,12 @@
             <input type="number" id="montant" placeholder="Montant" required>
 
             <button type="submit">Enregistrer le reçu</button>
+            <button type="button" id="btn-afficher">Afficher les 20 derniers enregistrements</button>
+            <button type="button" id="btn-supprimer">Supprimer les 20 derniers enregistrements</button>
         </form>
 
+        <!-- Conteneur pour afficher le lien -->
         <div id="link-container"></div>
-
-        <!-- Boutons pour afficher et supprimer les derniers documents -->
-        <button onclick="afficherDerniersDocuments()">Afficher les 20 derniers enregistrements</button>
-        <button onclick="supprimerDerniersDocuments()">Supprimer les 20 derniers enregistrements</button>
-
-        <!-- Liste des documents -->
-        <div id="documents-list"></div>
     </div>
 </body>
 </html>
