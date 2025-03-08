@@ -8,7 +8,7 @@
     <!-- Importation des SDK Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
         // Configuration Firebase
@@ -30,7 +30,6 @@
         // Fonction pour enregistrer les informations dans Firestore
         async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
             try {
-                // Ajout des données dans la collection "recu"
                 const docRef = await addDoc(collection(db, "recu"), {
                     nomClient: nomClient,
                     objetPayment: objetPayment,
@@ -39,7 +38,6 @@
                     montant: montant
                 });
 
-                // Afficher le lien avec l'ID du document créé
                 const link = `https://eduplus-ci.github.io/QRcode/verify.html?id=${docRef.id}`;
                 const linkContainer = document.getElementById("link-container");
                 linkContainer.innerHTML = `Votre reçu a été enregistré avec succès. Vous pouvez le vérifier ici : <a href="${link}" target="_blank">${link}</a>`;
@@ -59,12 +57,47 @@
             const moisConcerne = document.getElementById("moisConcerne").value;
             const montant = document.getElementById("montant").value;
 
-            // Appeler la fonction pour enregistrer le reçu
             enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant);
-            
-            // Réinitialiser le formulaire après l'enregistrement
+
             document.getElementById("form-recu").reset();
         });
+
+        // Fonction pour afficher les 20 derniers enregistrements
+        async function afficherDerniersDocuments() {
+            const recuRef = collection(db, "recu");
+            const q = query(recuRef, orderBy("datePayment", "desc"), limit(20));  // Trier par datePayment décroissante, limite à 20 résultats
+
+            try {
+                const querySnapshot = await getDocs(q);
+                let output = "<ul>";
+                querySnapshot.forEach((doc) => {
+                    output += `<li>Client: ${doc.data().nomClient}, Paiement: ${doc.data().montant} EUR, Date: ${doc.data().datePayment}</li>`;
+                });
+                output += "</ul>";
+                document.getElementById("documents-list").innerHTML = output;
+            } catch (e) {
+                console.error("Erreur lors de la récupération des documents: ", e);
+            }
+        }
+
+        // Fonction pour supprimer les 20 derniers enregistrements
+        async function supprimerDerniersDocuments() {
+            const recuRef = collection(db, "recu");
+            const q = query(recuRef, orderBy("datePayment", "desc"), limit(20));
+
+            try {
+                const querySnapshot = await getDocs(q);
+                querySnapshot.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                    console.log(`Document ${doc.id} supprimé`);
+                });
+
+                // Rafraîchir la liste après la suppression
+                afficherDerniersDocuments();
+            } catch (e) {
+                console.error("Erreur lors de la suppression des documents: ", e);
+            }
+        }
     </script>
 
     <style>
@@ -160,6 +193,11 @@
             text-align: center;
             font-size: 16px;
         }
+
+        #documents-list {
+            margin-top: 20px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -184,8 +222,14 @@
             <button type="submit">Enregistrer le reçu</button>
         </form>
 
-        <!-- Conteneur pour afficher le lien -->
         <div id="link-container"></div>
+
+        <!-- Boutons pour afficher et supprimer les derniers documents -->
+        <button onclick="afficherDerniersDocuments()">Afficher les 20 derniers enregistrements</button>
+        <button onclick="supprimerDerniersDocuments()">Supprimer les 20 derniers enregistrements</button>
+
+        <!-- Liste des documents -->
+        <div id="documents-list"></div>
     </div>
 </body>
 </html>
