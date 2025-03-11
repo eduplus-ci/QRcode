@@ -27,6 +27,11 @@
         const db = getFirestore(app); // Initialisation de Firestore
         const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
 
+        // Vérifier l'authentification au chargement de la page
+        if (localStorage.getItem('authenticated') !== 'true') {
+            window.location.href = 'login.html'; // Rediriger vers login.html si non authentifié
+        }
+
         // Fonction pour enregistrer les informations dans Firestore
         async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
             try {
@@ -113,6 +118,14 @@
 
         // Ajouter un événement pour le bouton "Supprimer"
         document.getElementById("btn-supprimer").addEventListener("click", supprimerDerniersEnregistrements);
+    </script>
+
+    <!-- Fonction de déconnexion (accessible globalement) -->
+    <script>
+        function logout() {
+            localStorage.removeItem('authenticated'); // Supprimer l'état d'authentification
+            window.location.href = 'login.html'; // Rediriger vers la page de connexion
+        }
     </script>
 
     <style>
@@ -208,6 +221,16 @@
             text-align: center;
             font-size: 16px;
         }
+
+        /* Bouton de déconnexion */
+        #btn-deconnexion {
+            background-color: #f44336;
+            margin-top: 10px;
+        }
+
+        #btn-deconnexion:hover {
+            background-color: #d32f2f;
+        }
     </style>
 </head>
 <body>
@@ -231,11 +254,8 @@
 
             <button type="submit">Enregistrer le reçu</button>
             <button type="button" id="btn-afficher" style="background-color: #80a6bd;">Afficher les 5 derniers enregistrements</button>
-           
-           
-            <!-- 
-              <button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers enregistrements</button>
-            -->
+            <button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers enregistrements</button>
+            <button type="button" id="btn-deconnexion" onclick="logout()">Déconnexion</button>
         </form>
 
         <!-- Conteneur pour afficher le lien -->
