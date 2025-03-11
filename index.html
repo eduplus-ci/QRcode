@@ -27,18 +27,12 @@
         const db = getFirestore(app); // Initialisation de Firestore
         const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
 
-        // Vérifier l'authentification au chargement de la page
-        if (localStorage.getItem('authenticated') !== 'true') {
-            window.location.href = 'login.html'; // Rediriger vers login.html si non authentifié
-        }
-
         // Fonction pour enregistrer les informations dans Firestore
-        async function enregistrerRecu(type, nom, objetPayment, datePayment, moisConcerne, montant) {
+        async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
             try {
                 // Ajout des données dans la collection "recu"
                 const docRef = await addDoc(collection(db, "recu"), {
-                    type: type, // "client" ou "enseignant"
-                    nom: nom,
+                    nomClient: nomClient,
                     objetPayment: objetPayment,
                     datePayment: datePayment,
                     moisConcerne: moisConcerne,
@@ -55,7 +49,7 @@
             }
         }
 
-        // Fonction pour afficher les 5 derniers enregistrements
+        // Fonction pour afficher les 5 derniers enregistrements (nom du client et date du paiement)
         async function afficherDerniersEnregistrements() {
             try {
                 const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5)); // Limite à 5
@@ -68,7 +62,7 @@
                     linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
-                        linkContainer.innerHTML += `<p><strong>Type :</strong> ${data.type} | <strong>Nom :</strong> ${data.nom} | <strong>Date du paiement :</strong> ${data.datePayment}</p>`;
+                        linkContainer.innerHTML += `<p><strong>Nom du client :</strong> ${data.nomClient} | <strong>Date du paiement :</strong> ${data.datePayment}</p>`;
                     });
                 }
             } catch (e) {
@@ -77,7 +71,7 @@
             }
         }
 
-        // Fonction pour supprimer les 5 derniers enregistrements
+        // Fonction pour supprimer les 5 derniers enregistrements (documents entiers)
         async function supprimerDerniersEnregistrements() {
             try {
                 const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5)); // Limite à 5
@@ -97,31 +91,18 @@
             }
         }
 
-        // Gérer l'affichage du champ de saisie en fonction de la sélection
-        function gererAffichageChamp() {
-            const typeSelectionne = document.querySelector('input[name="type"]:checked').value;
-            const champNom = document.getElementById("champ-nom");
-
-            if (typeSelectionne === "client") {
-                champNom.innerHTML = '<label for="nom">Nom du client:</label><input type="text" id="nom" placeholder="Nom du client" required>';
-            } else if (typeSelectionne === "enseignant") {
-                champNom.innerHTML = '<label for="nom">Nom de l\'enseignant:</label><input type="text" id="nom" placeholder="Nom de l\'enseignant" required>';
-            }
-        }
-
         // Ajouter un événement de soumission de formulaire
         document.getElementById("form-recu").addEventListener("submit", function(event) {
             event.preventDefault();
 
-            const type = document.querySelector('input[name="type"]:checked').value;
-            const nom = document.getElementById("nom").value;
+            const nomClient = document.getElementById("nomClient").value;
             const objetPayment = document.getElementById("objetPayment").value;
             const datePayment = document.getElementById("datePayment").value;
             const moisConcerne = document.getElementById("moisConcerne").value;
             const montant = document.getElementById("montant").value;
 
             // Appeler la fonction pour enregistrer le reçu
-            enregistrerRecu(type, nom, objetPayment, datePayment, moisConcerne, montant);
+            enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant);
             
             // Réinitialiser le formulaire après l'enregistrement
             document.getElementById("form-recu").reset();
@@ -132,19 +113,6 @@
 
         // Ajouter un événement pour le bouton "Supprimer"
         document.getElementById("btn-supprimer").addEventListener("click", supprimerDerniersEnregistrements);
-
-        // Ajouter un événement pour la sélection du type (client ou enseignant)
-        document.querySelectorAll('input[name="type"]').forEach((input) => {
-            input.addEventListener("change", gererAffichageChamp);
-        });
-    </script>
-
-    <!-- Fonction de déconnexion (accessible globalement) -->
-    <script>
-        function logout() {
-            localStorage.removeItem('authenticated'); // Supprimer l'état d'authentification
-            window.location.href = 'login.html'; // Rediriger vers la page de connexion
-        }
     </script>
 
     <style>
@@ -240,49 +208,14 @@
             text-align: center;
             font-size: 16px;
         }
-
-        /* Bouton de déconnexion */
-        #btn-deconnexion {
-            background-color: #f44336;
-            margin-top: 10px;
-        }
-
-        #btn-deconnexion:hover {
-            background-color: #d32f2f;
-        }
-
-        /* Style pour la checkliste */
-        .checkliste {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .checkliste label {
-            font-size: 16px;
-            color: #333;
-        }
     </style>
 </head>
 <body>
     <div class="form-container">
         <h1>Enregistrer un reçu</h1>
         <form id="form-recu">
-            <!-- Checkliste pour choisir entre client et enseignant -->
-            <div class="checkliste">
-                <label>
-                    <input type="radio" name="type" value="client" checked> Nom du client
-                </label>
-                <label>
-                    <input type="radio" name="type" value="enseignant"> Nom de l'enseignant
-                </label>
-            </div>
-
-            <!-- Champ dynamique pour le nom -->
-            <div id="champ-nom">
-                <label for="nom">Nom du client:</label>
-                <input type="text" id="nom" placeholder="Nom du client" required>
-            </div>
+            <label for="nomClient">Nom du client:</label>
+            <input type="text" id="nomClient" placeholder="Nom du client" required>
 
             <label for="objetPayment">Objet du paiement:</label>
             <input type="text" id="objetPayment" placeholder="Objet du paiement" required>
@@ -298,10 +231,11 @@
 
             <button type="submit">Enregistrer le reçu</button>
             <button type="button" id="btn-afficher" style="background-color: #80a6bd;">Afficher les 5 derniers enregistrements</button>
-
-            <!--<button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers enregistrements</button>-->
-            
-            <button type="button" id="btn-deconnexion" onclick="logout()">Déconnexion</button>
+           
+           
+            <!-- 
+              <button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers enregistrements</button>
+            -->
         </form>
 
         <!-- Conteneur pour afficher le lien -->
