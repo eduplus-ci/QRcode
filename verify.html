@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vérifier le Reçu</title>
+    <title>Enregistrer un Reçu sur Firebase</title>
 
     <!-- Importation des SDK Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
 
         // Configuration Firebase
@@ -27,108 +27,93 @@
         const db = getFirestore(app); // Initialisation de Firestore
         const analytics = getAnalytics(app); // Si tu veux utiliser Analytics (facultatif)
 
-        // Fonction pour formater les nombres avec des séparateurs de milliers
-        function formatNumberWithSpaces(number) {
-            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-        }
-
-        // Fonction pour récupérer un reçu par ID
-        async function getReceiptById(receiptId) {
+        // Fonction pour enregistrer les informations dans Firestore
+        async function enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant) {
             try {
-                if (!receiptId) {
-                    throw new Error("ID de reçu manquant.");
-                }
+                // Ajout des données dans la collection "recu"
+                const docRef = await addDoc(collection(db, "recu"), {
+                    nomClient: nomClient,
+                    objetPayment: objetPayment,
+                    datePayment: datePayment,
+                    moisConcerne: moisConcerne,
+                    montant: montant
+                });
 
-                const docRef = doc(db, "recu", receiptId);  // On récupère le document par ID
-                const docSnap = await getDoc(docRef);  // Obtenir le document
+                // Afficher le lien avec l'ID du document créé
+                const link = `https://eduplus-ci.github.io/QRcode/verify.html?id=${docRef.id}`;
+                const linkContainer = document.getElementById("link-container");
+                linkContainer.innerHTML = `Votre reçu a été enregistré avec succès. Vous pouvez le vérifier ici : <a href="${link}" target="_blank">${link}</a>`;
+            } catch (e) {
+                console.error("Erreur lors de l'ajout du document : ", e);
+                alert("Erreur lors de l'enregistrement du reçu");
+            }
+        }
 
-                if (docSnap.exists()) {
-                    // Si le document existe, on affiche les données
-                    const receiptData = docSnap.data();
-                    document.getElementById("nomClient").innerText = receiptData.nomClient;
-                    document.getElementById("objetPayment").innerText = receiptData.objetPayment;
-                    document.getElementById("datePayment").innerText = receiptData.datePayment;
-                    document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
+        // Fonction pour afficher les 5 derniers enregistrements (nom du client et date du paiement)
+        async function afficherDerniersEnregistrements() {
+            try {
+                const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5)); // Limite à 5
+                const querySnapshot = await getDocs(q);
+                const linkContainer = document.getElementById("link-container");
 
-                    // Formater le montant avec des séparateurs de milliers
-                    const formattedAmount = formatNumberWithSpaces(receiptData.montant);
-                    document.getElementById("montant").innerText = `${formattedAmount} franc CFA`; // Ajout de "franc CFA"
-
-                    document.getElementById("receiptok").innerText = "© 2024 - Édu'Plus, Tous droits réservés.";
-                    document.getElementById("receiptok").style.display = "block"; // Afficher le message
-
-                    // Générer le QR code
-                    generateQRCode(receiptId);
+                if (querySnapshot.empty) {
+                    linkContainer.innerHTML = "<p>Votre base de données est vide.</p>";
                 } else {
-                    // Si le document n'existe pas
-                    document.getElementById("receiptDetails").innerText = "Aucun reçu trouvé pour cet ID.";
+                    linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        linkContainer.innerHTML += `<p><strong>Nom du client :</strong> ${data.nomClient} | <strong>Date du paiement :</strong> ${data.datePayment}</p>`;
+                    });
                 }
-            } catch (error) {
-                console.error("Erreur lors de la récupération du reçu :", error);
-                document.getElementById("receiptDetails").innerText = error.message || "Une erreur s'est produite lors de la récupération du reçu.";
-            } finally {
-                document.getElementById("loading").style.display = "none"; // Masquer le spinner
+            } catch (e) {
+                console.error("Erreur lors de la récupération des documents : ", e);
+                alert("Erreur lors de l'affichage des enregistrements");
             }
         }
 
-        // Fonction pour générer un QR code
-        function generateQRCode(receiptId) {
-            const qrCodeUrl = `https://eduplus-ci.github.io/QRcode/verify.html?id=${receiptId}`;
-            const qrCodeContainer = document.getElementById("qrcode");
+        // Fonction pour supprimer les 5 derniers enregistrements (documents entiers)
+        async function supprimerDerniersEnregistrements() {
+            try {
+                const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5)); // Limite à 5
+                const querySnapshot = await getDocs(q);
 
-            // Effacer le contenu précédent du conteneur QR code
-            qrCodeContainer.innerHTML = "";
-
-            // Générer le nouveau QR code
-            new QRCode(qrCodeContainer, {
-                text: qrCodeUrl,
-                width: 150, // Taille réduite du QR code
-                height: 150,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-        }
-
-        // Fonction pour vérifier si des barres de défilement sont visibles
-        function checkScrollbars() {
-            // Vérifier l'orientation de l'écran
-            const isPortrait = window.matchMedia("(orientation: portrait)").matches;
-
-            // Si l'écran est en mode portrait, vérifier les barres de défilement
-            if (isPortrait) {
-                const hasVerticalScrollbar = document.documentElement.scrollHeight > document.documentElement.clientHeight;
-                const hasHorizontalScrollbar = document.documentElement.scrollWidth > document.documentElement.clientWidth;
-
-                if (hasVerticalScrollbar || hasHorizontalScrollbar) {
-                    alert("Pour mieux visualiser votre reçu, veuillez passer en mode paysage.");
+                if (querySnapshot.empty) {
+                    alert("Votre base de données est vide.");
+                } else {
+                    querySnapshot.forEach(async (doc) => {
+                        await deleteDoc(doc.ref); // Supprime le document entier
+                    });
+                    alert("Les 5 derniers enregistrements ont été supprimés avec succès.");
                 }
+            } catch (e) {
+                console.error("Erreur lors de la suppression des documents : ", e);
+                alert("Erreur lors de la suppression des enregistrements");
             }
         }
 
-        // Récupérer l'ID du reçu à partir de l'URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const receiptId = urlParams.get('id');
+        // Ajouter un événement de soumission de formulaire
+        document.getElementById("form-recu").addEventListener("submit", function(event) {
+            event.preventDefault();
 
-        if (receiptId) {
-            // Si un ID est passé dans l'URL, on récupère le reçu correspondant
-            getReceiptById(receiptId);
-        } else {
-            // Si l'ID n'est pas passé dans l'URL
-            document.getElementById("receiptDetails").innerText = "ID de reçu manquant dans l'URL.";
-            document.getElementById("loading").style.display = "none"; // Masquer le spinner
-        }
+            const nomClient = document.getElementById("nomClient").value;
+            const objetPayment = document.getElementById("objetPayment").value;
+            const datePayment = document.getElementById("datePayment").value;
+            const moisConcerne = document.getElementById("moisConcerne").value;
+            const montant = document.getElementById("montant").value;
 
-        // Vérifier les barres de défilement au chargement de la page
-        window.addEventListener("load", checkScrollbars);
+            // Appeler la fonction pour enregistrer le reçu
+            enregistrerRecu(nomClient, objetPayment, datePayment, moisConcerne, montant);
+            
+            // Réinitialiser le formulaire après l'enregistrement
+            document.getElementById("form-recu").reset();
+        });
 
-        // Vérifier les barres de défilement lors du redimensionnement de la fenêtre ou du changement d'orientation
-        window.addEventListener("resize", checkScrollbars);
-        window.addEventListener("orientationchange", checkScrollbars);
+        // Ajouter un événement pour le bouton "Afficher"
+        document.getElementById("btn-afficher").addEventListener("click", afficherDerniersEnregistrements);
+
+        // Ajouter un événement pour le bouton "Supprimer"
+        document.getElementById("btn-supprimer").addEventListener("click", supprimerDerniersEnregistrements);
     </script>
-
-    <!-- Importation de la bibliothèque QRCode.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" async></script>
 
     <style>
         body {
@@ -139,38 +124,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            min-width: 800px; /* Largeur minimale */
-            overflow-x: auto; /* Défilement horizontal si nécessaire */
-            overflow-y: auto; /* Défilement vertical si nécessaire */
-        }
-
-        .container {
-            width: 800px; /* Largeur fixe */
-            margin: 0 auto; /* Centrer horizontalement */
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            display: flex;
-            gap: 20px;
-            flex-wrap: nowrap; /* Empêcher le retour à la ligne */
-
-            /* Ajout de l'image de fond */
-            background-image: url('fondp.png'); /* Chemin de l'image */
-            background-size: cover; /* Couvre tout le container sans déformation */
-            background-position: center; /* Centre l'image */
-            background-repeat: no-repeat; /* Empêche la répétition de l'image */
-        }
-
-        .details-section {
-            flex: 1;
-        }
-
-        .qr-section {
-            flex-shrink: 0; /* Empêcher le rétrécissement */
-            display: flex;
-            align-items: center;
+            height: 100vh;
         }
 
         h1 {
@@ -178,81 +132,114 @@
             color: #333;
         }
 
-        .details {
-            font-size: 16px; /* Taille de police fixe */
-            color: #333;
-            margin-bottom: 15px; /* Espacement fixe */
-        }
-
-        .details label {
-            font-weight: bold;
-        }
-
-        .details span {
-            color: #555;
-        }
-
-        #receiptDetails {
-            font-size: 18px;
-            font-weight: bold;
-            color: red;
-            text-align: center;
-        }
-
-        #receiptok {
-            font-size: 18px;
-            font-weight: bold;
-            color: #3e8e41;
-            text-align: center;
-            margin-top: 30px;
-            display: none;
+        .form-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
             width: 100%;
-            white-space: normal;
-            word-wrap: break-word;
+            max-width: 400px;
         }
 
-        #loading {
-            font-size: 18px;
-            font-weight: bold;
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 16px;
+            margin-bottom: 8px;
             color: #333;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"] {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:active {
+            background-color: #3e8e41;
+        }
+
+        .form-container input:disabled {
+            background-color: #f0f0f0;
+        }
+
+        .form-container input::placeholder {
+            color: #aaa;
+        }
+
+        .form-container button:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+
+        /* Style pour afficher le lien */
+        #link-container {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="details-section">
-            <h1>Reçu de Paiement</h1>
-            <div id="loading">Chargement en cours...</div> <!-- Indicateur de chargement -->
-            <div id="receiptDetails"></div> <!-- Message d'erreur -->
+    <div class="form-container">
+        <h1>Enregistrer un reçu</h1>
+        <form id="form-recu">
+            <label for="nomClient">Nom du client:</label>
+            <input type="text" id="nomClient" placeholder="Nom du client" required>
 
-            <div class="details">
-                <label for="nomClient">Nom du client:</label>
-                <span id="nomClient">Chargement...</span>
-            </div>
-            <div class="details">
-                <label for="objetPayment">Objet du paiement:</label>
-                <span id="objetPayment">Chargement...</span>
-            </div>
-            <div class="details">
-                <label for="datePayment">Date du paiement:</label>
-                <span id="datePayment">Chargement...</span>
-            </div>
-            <div class="details">
-                <label for="moisConcerne">Mois concerné:</label>
-                <span id="moisConcerne">Chargement...</span>
-            </div>
-            <div class="details">
-                <label for="montant">Montant:</label>
-                <span id="montant">Chargement...</span>
-            </div>
+            <label for="objetPayment">Objet du paiement:</label>
+            <input type="text" id="objetPayment" placeholder="Objet du paiement" required>
 
-            <!-- Message de succès -->
-            <div id="receiptok"></div>
-        </div>
+            <label for="datePayment">Date du paiement:</label>
+            <input type="date" id="datePayment" required>
 
-        <div class="qr-section">
-            <div id="qrcode"></div> <!-- Conteneur pour le QR code -->
-        </div>
+            <label for="moisConcerne">Mois concerné:</label>
+            <input type="text" id="moisConcerne" placeholder="Mois concerné" required>
+
+            <label for="montant">Montant:</label>
+            <input type="number" id="montant" placeholder="Montant" required>
+
+            <button type="submit">Enregistrer le reçu</button>
+            <button type="button" id="btn-afficher" style="background-color: #80a6bd;">Afficher les 5 derniers enregistrements</button>
+           
+           
+            <!-- 
+              <button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers enregistrements</button>
+            -->
+        </form>
+
+        <!-- Conteneur pour afficher le lien -->
+        <div id="link-container"></div>
     </div>
 </body>
 </html>
