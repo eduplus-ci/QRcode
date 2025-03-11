@@ -1,1 +1,59 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <!-- Ajoutez Firebase JS SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <h1>Connexion</h1>
+    <form id="loginForm">
+        <label for="password">Mot de passe:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Se connecter</button>
+    </form>
+
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB97LgphZHLJ6vXEjgMu315pCV8mQxrQ70",
+            authDomain: "databasere-e2d71.firebaseapp.com",
+            projectId: "databasere-e2d71",
+            storageBucket: "databasere-e2d71.appspot.com",
+            messagingSenderId: "83464780951",
+            appId: "1:83464780951:web:47c0846b383418a2abfdd2",
+            measurementId: "G-47B4QRQTYX"
+        };
+
+        // Initialiser Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.firestore();
+
+        // Gestion de la soumission du formulaire
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const password = document.getElementById('password').value;
+
+            // Récupérer le mot de passe depuis Firestore
+            db.collection('config').doc('motDePasse').get().then((doc) => {
+                if (doc.exists && doc.data().valeur === password) {
+                    // Mot de passe correct
+                    localStorage.setItem('authenticated', 'true'); // Stocker l'état d'authentification
+                    window.location.href = 'index.html'; // Rediriger vers index.html
+                } else {
+                    alert('Mot de passe incorrect'); // Mot de passe incorrect
+                }
+            }).catch((error) => {
+                console.error("Erreur lors de la récupération du mot de passe: ", error);
+            });
+        });
+    </script>
+</body>
+</html>
