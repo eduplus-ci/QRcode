@@ -45,7 +45,13 @@
                 if (docSnap.exists()) {
                     // Si le document existe, on affiche les données
                     const receiptData = docSnap.data();
-                    document.getElementById("nomClient").innerText = receiptData.nomClient;
+
+                    // Afficher le type de personne (client ou enseignant)
+                    const typePersonne = receiptData.typePersonne || "Nom du client"; // Par défaut, "Nom du client"
+                    document.getElementById("typePersonneLabel").innerText = typePersonne + " :";
+                    document.getElementById("nom").innerText = receiptData.nom;
+
+                    // Afficher les autres détails
                     document.getElementById("objetPayment").innerText = receiptData.objetPayment;
                     document.getElementById("datePayment").innerText = receiptData.datePayment;
                     document.getElementById("moisConcerne").innerText = receiptData.moisConcerne;
@@ -226,8 +232,8 @@
             <div id="receiptDetails"></div> <!-- Message d'erreur -->
 
             <div class="details">
-                <label for="nomClient">Nom du client:</label>
-                <span id="nomClient">Chargement...</span>
+                <label id="typePersonneLabel">Nom du client :</label>
+                <span id="nom">Chargement...</span>
             </div>
             <div class="details">
                 <label for="objetPayment">Objet du paiement:</label>
