@@ -118,8 +118,10 @@
 
         // Ajouter un événement pour le bouton "Supprimer"
         document.getElementById("btn-supprimer").addEventListener("click", supprimerDerniersEnregistrements);
+    </script>
 
-        // Fonction de déconnexion
+    <!-- Fonction de déconnexion (accessible globalement) -->
+    <script>
         function logout() {
             localStorage.removeItem('authenticated'); // Supprimer l'état d'authentification
             window.location.href = 'login.html'; // Rediriger vers la page de connexion
