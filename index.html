@@ -101,10 +101,21 @@
                     return;
                 }
 
-                linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
+                // Ajouter un titre si c'est la première page
+                if (!lastVisible) {
+                    linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
+                }
+
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    linkContainer.innerHTML += `<p><strong>Type :</strong> ${data.typePersonne} | <strong>Nom :</strong> ${data.nom} | <strong>Date du paiement :</strong> ${data.datePayment}</p>`;
+                    // Ajouter l'ID du document à l'affichage
+                    linkContainer.innerHTML += `
+                        <p>
+                            <strong>ID :</strong> ${doc.id} | 
+                            <strong>Type :</strong> ${data.typePersonne} | 
+                            <strong>Nom :</strong> ${data.nom} | 
+                            <strong>Date du paiement :</strong> ${data.datePayment}
+                        </p>`;
                 });
 
                 // Mettre à jour le dernier document visible pour la pagination
@@ -292,6 +303,18 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        #link-container p {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #link-container strong {
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -321,11 +344,7 @@
 
             <button type="submit">Enregistrer le reçu</button>
             <button type="button" id="btn-afficher-plus" style="background-color: #80a6bd;">Afficher plus</button>
-            
-            
-
-            <!-- <button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers</button> -->
-            
+            <button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers</button>
             <button type="button" id="btn-deconnexion" onclick="logout()">Déconnexion</button>
         </form>
 
