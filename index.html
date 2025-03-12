@@ -8,7 +8,7 @@
     <!-- Importation des SDK Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, deleteDoc, startAfter, doc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
         // Configuration Firebase
         const firebaseConfig = {
@@ -25,13 +25,36 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Variables pour la pagination
+        let lastVisible = null;
+        let isFetching = false;
+
         // Vérifier l'authentification au chargement de la page
         if (localStorage.getItem('authenticated') !== 'true') {
             window.location.href = 'login.html'; // Rediriger vers login.html si non authentifié
         }
 
+        // Fonction pour afficher une notification toast
+        function showToast(message, isSuccess = true) {
+            const toast = document.createElement("div");
+            toast.className = `toast ${isSuccess ? "toast-success" : "toast-error"}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Fonction pour afficher un indicateur de chargement
+        function toggleLoading(show) {
+            const loading = document.getElementById("loading");
+            loading.style.display = show ? "block" : "none";
+        }
+
         // Fonction pour enregistrer les informations dans Firestore
         async function enregistrerRecu(typePersonne, nom, objetPayment, datePayment, moisConcerne, montant) {
+            toggleLoading(true);
             try {
                 // Ajout des données dans la collection "recu"
                 const docRef = await addDoc(collection(db, "recu"), {
@@ -47,51 +70,74 @@
                 const link = `https://eduplus-ci.github.io/QRcode/verify.html?id=${docRef.id}`;
                 const linkContainer = document.getElementById("link-container");
                 linkContainer.innerHTML = `Votre reçu a été enregistré avec succès. Vous pouvez le vérifier ici : <a href="${link}" target="_blank">${link}</a>`;
+                showToast("Reçu enregistré avec succès !");
             } catch (e) {
                 console.error("Erreur lors de l'ajout du document : ", e);
-                alert("Erreur lors de l'enregistrement du reçu");
+                showToast("Erreur lors de l'enregistrement du reçu", false);
+            } finally {
+                toggleLoading(false);
             }
         }
 
-        // Fonction pour afficher les 5 derniers enregistrements
-        async function afficherDerniersEnregistrements() {
+        // Fonction pour afficher les enregistrements avec pagination
+        async function afficherEnregistrements() {
+            if (isFetching) return;
+            isFetching = true;
+            toggleLoading(true);
+
             try {
-                const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5));
+                let q;
+                if (lastVisible) {
+                    q = query(collection(db, "recu"), orderBy("datePayment", "desc"), startAfter(lastVisible), limit(5));
+                } else {
+                    q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5));
+                }
+
                 const querySnapshot = await getDocs(q);
                 const linkContainer = document.getElementById("link-container");
 
                 if (querySnapshot.empty) {
-                    linkContainer.innerHTML = "<p>Votre base de données est vide.</p>";
-                } else {
-                    linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        linkContainer.innerHTML += `<p><strong>Type :</strong> ${data.typePersonne} | <strong>Nom :</strong> ${data.nom} | <strong>Date du paiement :</strong> ${data.datePayment}</p>`;
-                    });
+                    showToast("Aucun enregistrement supplémentaire trouvé.", false);
+                    return;
                 }
+
+                linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    linkContainer.innerHTML += `<p><strong>Type :</strong> ${data.typePersonne} | <strong>Nom :</strong> ${data.nom} | <strong>Date du paiement :</strong> ${data.datePayment}</p>`;
+                });
+
+                // Mettre à jour le dernier document visible pour la pagination
+                lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
             } catch (e) {
                 console.error("Erreur lors de la récupération des documents : ", e);
-                alert("Erreur lors de l'affichage des enregistrements");
+                showToast("Erreur lors de l'affichage des enregistrements", false);
+            } finally {
+                isFetching = false;
+                toggleLoading(false);
             }
         }
 
         // Fonction pour supprimer les 5 derniers enregistrements
         async function supprimerDerniersEnregistrements() {
+            toggleLoading(true);
             try {
                 const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5));
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    alert("Votre base de données est vide.");
+                    showToast("Votre base de données est vide.", false);
                 } else {
                     querySnapshot.forEach(async (doc) => {
                         await deleteDoc(doc.ref);
                     });
-                    alert("Les 5 derniers enregistrements ont été supprimés avec succès.");
+                    showToast("Les 5 derniers enregistrements ont été supprimés avec succès.");
                 }
             } catch (e) {
                 console.error("Erreur lors de la suppression des documents : ", e);
-                alert("Erreur lors de la suppression des enregistrements");
+                showToast("Erreur lors de la suppression des enregistrements", false);
+            } finally {
+                toggleLoading(false);
             }
         }
 
@@ -113,8 +159,8 @@
             document.getElementById("form-recu").reset();
         });
 
-        // Ajouter un événement pour le bouton "Afficher"
-        document.getElementById("btn-afficher").addEventListener("click", afficherDerniersEnregistrements);
+        // Ajouter un événement pour le bouton "Afficher plus"
+        document.getElementById("btn-afficher-plus").addEventListener("click", afficherEnregistrements);
 
         // Ajouter un événement pour le bouton "Supprimer"
         document.getElementById("btn-supprimer").addEventListener("click", supprimerDerniersEnregistrements);
@@ -198,6 +244,54 @@
         #btn-deconnexion:hover {
             background-color: #d32f2f;
         }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .toast-success {
+            background-color: #4CAF50;
+        }
+
+        .toast-error {
+            background-color: #f44336;
+        }
+
+        #loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #loading::after {
+            content: "";
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -226,13 +320,16 @@
             <input type="number" id="montant" placeholder="Montant" required>
 
             <button type="submit">Enregistrer le reçu</button>
-            <button type="button" id="btn-afficher" style="background-color: #80a6bd;">Afficher les 5 derniers enregistrements</button>
-            <button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers enregistrements</button>
+            <button type="button" id="btn-afficher-plus" style="background-color: #80a6bd;">Afficher plus</button>
+            <button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers</button>
             <button type="button" id="btn-deconnexion" onclick="logout()">Déconnexion</button>
         </form>
 
         <!-- Conteneur pour afficher le lien -->
         <div id="link-container"></div>
     </div>
+
+    <!-- Indicateur de chargement -->
+    <div id="loading"></div>
 </body>
 </html>
