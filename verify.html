@@ -45,7 +45,7 @@
                     const receiptData = docSnap.data();
 
                     // Afficher le type de personne (client ou enseignant)
-                    const typePersonne = receiptData.typePersonne || "Nom du/de la client";
+                    const typePersonne = receiptData.typePersonne || "Nom du/ de la client";
                     document.getElementById("typePersonneLabel").innerText = typePersonne + " :";
                     document.getElementById("nom").innerText = receiptData.nom;
 
