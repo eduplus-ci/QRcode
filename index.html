@@ -82,15 +82,17 @@
 
         // Fonction pour afficher les enregistrements avec pagination
         async function afficherEnregistrements() {
-            if (isFetching) return;
+            if (isFetching) return; // Empêcher les requêtes multiples simultanées
             isFetching = true;
             toggleLoading(true);
 
             try {
                 let q;
                 if (lastVisible) {
+                    // Si lastVisible est défini, récupérer les enregistrements après ce point
                     q = query(collection(db, "recu"), orderBy("datePayment", "desc"), startAfter(lastVisible), limit(5));
                 } else {
+                    // Sinon, récupérer les 5 premiers enregistrements
                     q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5));
                 }
 
@@ -98,7 +100,13 @@
                 const linkContainer = document.getElementById("link-container");
 
                 if (querySnapshot.empty) {
-                    showToast("Aucun enregistrement supplémentaire trouvé.", false);
+                    if (!lastVisible) {
+                        // Si la base de données est vide dès le début
+                        linkContainer.innerHTML = "<p>Aucun enregistrement trouvé.</p>";
+                    } else {
+                        // Si l'utilisateur a atteint la fin
+                        showToast("Vous êtes arrivé à la fin des enregistrements.", false);
+                    }
                     return;
                 }
 
@@ -107,15 +115,16 @@
                     linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
                 }
 
+                // Afficher chaque enregistrement
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    // Ajouter l'ID du document à l'affichage
                     linkContainer.innerHTML += `
                         <p>
                             <strong>ID :</strong> ${doc.id} | 
                             <strong>Type :</strong> ${data.typePersonne} | 
                             <strong>Nom :</strong> ${data.nom} | 
-                            <strong>Date du paiement :</strong> ${data.datePayment}
+                            <strong>Date du paiement :</strong> ${data.datePayment} | 
+                            <strong>Montant :</strong> ${data.montant}
                         </p>`;
                 });
 
@@ -126,29 +135,6 @@
                 showToast("Erreur lors de l'affichage des enregistrements", false);
             } finally {
                 isFetching = false;
-                toggleLoading(false);
-            }
-        }
-
-        // Fonction pour supprimer les 5 derniers enregistrements
-        async function supprimerDerniersEnregistrements() {
-            toggleLoading(true);
-            try {
-                const q = query(collection(db, "recu"), orderBy("datePayment", "desc"), limit(5));
-                const querySnapshot = await getDocs(q);
-
-                if (querySnapshot.empty) {
-                    showToast("Votre base de données est vide.", false);
-                } else {
-                    querySnapshot.forEach(async (doc) => {
-                        await deleteDoc(doc.ref);
-                    });
-                    showToast("Les 5 derniers enregistrements ont été supprimés avec succès.");
-                }
-            } catch (e) {
-                console.error("Erreur lors de la suppression des documents : ", e);
-                showToast("Erreur lors de la suppression des enregistrements", false);
-            } finally {
                 toggleLoading(false);
             }
         }
@@ -173,9 +159,6 @@
 
         // Ajouter un événement pour le bouton "Afficher plus"
         document.getElementById("btn-afficher-plus").addEventListener("click", afficherEnregistrements);
-
-        // Ajouter un événement pour le bouton "Supprimer"
-        document.getElementById("btn-supprimer").addEventListener("click", supprimerDerniersEnregistrements);
     </script>
 
     <!-- Fonction de déconnexion -->
@@ -345,9 +328,6 @@
 
             <button type="submit">Enregistrer le reçu</button>
             <button type="button" id="btn-afficher-plus" style="background-color: #80a6bd;">Afficher plus</button>
-           
-            <!--  <button type="button" id="btn-supprimer" style="background-color: red;">Supprimer les 5 derniers</button> -->
-            
             <button type="button" id="btn-deconnexion" onclick="logout()">Déconnexion</button>
         </form>
 
