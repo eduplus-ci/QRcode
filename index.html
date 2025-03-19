@@ -137,6 +137,33 @@
             }
         }
 
+        // Fonction pour supprimer les 5 enregistrements les plus anciens
+        async function supprimerEnregistrements() {
+            toggleLoading(true);
+            try {
+                // Récupérer les 5 enregistrements les plus anciens
+                const q = query(collection(db, "recu"), orderBy("datePayment", "asc"), limit(5));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    showToast("Aucun enregistrement à supprimer.", false);
+                    return;
+                }
+
+                // Supprimer chaque enregistrement
+                querySnapshot.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                });
+
+                showToast("Les 5 enregistrements les plus anciens ont été supprimés avec succès.");
+            } catch (e) {
+                console.error("Erreur lors de la suppression des documents : ", e);
+                showToast("Erreur lors de la suppression des enregistrements", false);
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
         // Ajouter un événement de soumission de formulaire
         document.getElementById("form-recu").addEventListener("submit", function(event) {
             event.preventDefault();
@@ -157,6 +184,9 @@
 
         // Ajouter un événement pour le bouton "Afficher plus"
         document.getElementById("btn-afficher-plus").addEventListener("click", afficherEnregistrements);
+
+        // Ajouter un événement pour le bouton "Supprimer"
+        document.getElementById("btn-supprimer").addEventListener("click", supprimerEnregistrements);
     </script>
 
     <!-- Fonction de déconnexion -->
@@ -236,6 +266,15 @@
 
         #btn-deconnexion:hover {
             background-color: #d32f2f;
+        }
+
+        #btn-supprimer {
+            background-color: #ff9800;
+            margin-top: 10px;
+        }
+
+        #btn-supprimer:hover {
+            background-color: #e68900;
         }
 
         .toast {
@@ -326,6 +365,7 @@
 
             <button type="submit">Enregistrer le reçu</button>
             <button type="button" id="btn-afficher-plus" style="background-color: #80a6bd;">Afficher plus</button>
+            <button type="button" id="btn-supprimer">Supprimer les 5 plus anciens</button>
             <button type="button" id="btn-deconnexion" onclick="logout()">Déconnexion</button>
         </form>
 
