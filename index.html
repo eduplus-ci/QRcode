@@ -110,10 +110,8 @@
                     return;
                 }
 
-                // Ajouter un titre si c'est la première page
-                if (!lastVisible) {
-                    linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
-                }
+                // Vider le contenu précédent avant d'afficher les nouveaux enregistrements
+                linkContainer.innerHTML = "<h2>Derniers enregistrements :</h2>";
 
                 // Afficher chaque enregistrement
                 querySnapshot.forEach((doc) => {
